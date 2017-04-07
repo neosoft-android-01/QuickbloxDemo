@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="quickblox-android-sdk-chat-2.6.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-tcp-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-resolver-minidns-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-experimental-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-sasl-provided-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-extensions-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-android-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-im-4.1.6-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/jars/libs/smack-core-4.1.6-SNAPSHOT.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/9c7a0139f9e7315e74b92a099469d8f5f77e3bc9/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="quickblox-android-sdk-core-2.6.1">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/d82ed746ae73b08140446b62473729be678123d0/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/d82ed746ae73b08140446b62473729be678123d0/output/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.android/build-cache/d82ed746ae73b08140446b62473729be678123d0/output/jars/libs/qb-gson2.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
