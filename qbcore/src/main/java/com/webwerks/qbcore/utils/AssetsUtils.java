@@ -1,11 +1,10 @@
-package com.webwerks.quickbloxdemo.utils;
+package com.webwerks.qbcore.utils;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.webwerks.quickbloxdemo.model.QbConfig;
+import com.webwerks.qbcore.models.QbConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +17,7 @@ import java.io.InputStreamReader;
 
 public class AssetsUtils {
 
-    public static QbConfig getQbConfigurationFromAssets(String filename,Context context){
+    public static QbConfig getQbConfigurationFromAssets(String filename, Context context){
         QbConfig qbConfig=null;
         try {
             String config=AssetsUtils.getJsonStringFromFile(filename,context);

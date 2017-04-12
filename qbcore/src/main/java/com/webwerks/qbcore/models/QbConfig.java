@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.model;
+package com.webwerks.qbcore.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

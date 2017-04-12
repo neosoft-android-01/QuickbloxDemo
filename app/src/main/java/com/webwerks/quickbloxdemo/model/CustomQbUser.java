@@ -3,6 +3,7 @@ package com.webwerks.quickbloxdemo.model;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 
+import com.quickblox.users.model.QBUser;
 import com.webwerks.quickbloxdemo.BR;
 
 /**
@@ -54,5 +55,13 @@ public class CustomQbUser extends BaseObservable {
     public void setLastName(String lastName) {
         this.lastName = lastName;
         notifyPropertyChanged(BR.lastName);
+    }
+
+    public QBUser getQBUser(){
+        QBUser user=new QBUser();
+        user.setEmail(this.email);
+        user.setPassword(this.password);
+        user.setFullName(this.firstName+" "+this.lastName);
+        return user;
     }
 }

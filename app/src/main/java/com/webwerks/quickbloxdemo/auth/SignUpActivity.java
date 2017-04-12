@@ -22,6 +22,6 @@ public class SignUpActivity extends BaseActivity {
     public void initializeUiComponents() {
         ActivitySignupBinding signupBinding= DataBindingUtil.setContentView(this,getContentLayout());
         signupBinding.setUser(new CustomQbUser());
-        signupBinding.setViewModel(new SignUpViewModel(signupBinding));
+        signupBinding.setViewModel(new SignUpViewModel(this,signupBinding));
     }
 }
