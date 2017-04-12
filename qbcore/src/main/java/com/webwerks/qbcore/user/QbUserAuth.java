@@ -71,7 +71,7 @@ public class QbUserAuth {
 
     public static void getUsers(){
 
-        Observable.fromArray(new ArrayList<QBUsers>).
+        //Observable.fromArray(new ArrayList<QBUsers>).
 
         QBPagedRequestBuilder pagedRequestBuilder=new QBPagedRequestBuilder();
         pagedRequestBuilder.setPage(1);
