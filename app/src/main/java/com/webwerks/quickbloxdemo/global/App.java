@@ -1,10 +1,16 @@
 package com.webwerks.quickbloxdemo.global;
 
 import android.app.Application;
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.view.Window;
 
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.auth.QBInitialization;
 import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.quickbloxdemo.R;
+import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
 
 
 /**
@@ -17,11 +23,14 @@ public class App extends Application {
     private QbUser currentUser=null;
 
     public QbUser getCurrentUser() {
+        if(currentUser==null)
+            currentUser=SharedPrefUtils.getInstance().getQbUser();
         return currentUser;
     }
 
     public void setCurrentUser(QbUser currentUser) {
         this.currentUser = currentUser;
+        SharedPrefUtils.getInstance().saveQbUser(currentUser);
     }
 
     @Override
@@ -35,5 +44,22 @@ public class App extends Application {
         if(appInstance==null)
             appInstance=new App();
         return appInstance;
+    }
+
+    Dialog alertDialog;
+
+    public void showLoading(Context context){
+        alertDialog = new Dialog(context);
+        alertDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setContentView(R.layout.dialog_loader);
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
+    }
+
+    public void hideLoading(){
+        if (alertDialog != null) {
+            alertDialog.dismiss();
+        }
     }
 }

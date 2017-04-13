@@ -1,6 +1,7 @@
 package com.webwerks.qbcore.user;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.quickblox.core.QBEntityCallback;
@@ -8,6 +9,7 @@ import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
+import com.webwerks.qbcore.database.UserDbHelper;
 import com.webwerks.qbcore.models.QbUser;
 
 import java.util.ArrayList;
@@ -17,7 +19,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 
 /**
  * Created by webwerks on 7/4/17.
@@ -32,16 +33,16 @@ public class QbUserAuth {
                 .map(new Function<QBUser, QbUser>() {
                     @Override
                     public QbUser apply(QBUser user) throws Exception {
-                        user = QBUsers.signUp(user).perform();
-                        final QbUser dbUser = QbUser.fromQbUser(user);
-                        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                realm.copyToRealm(dbUser);
-                            }
-                        });
-
-                        return dbUser;
+                        try {
+                            QBUser respoUser = QBUsers.signUp(user).perform();
+                            respoUser.setPassword(user.getPassword());
+                            QbUser dbUser = QbUser.fromQbUser(respoUser);
+                            UserDbHelper.getInstance().saveUserToDb(dbUser);
+                            return dbUser;
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            throw new Exception(getErrorMessage(e.getMessage()));
+                        }
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -53,25 +54,38 @@ public class QbUserAuth {
                 .map(new Function<QBUser, QbUser>() {
                     @Override
                     public QbUser apply(QBUser user) throws Exception {
-                        user = QBUsers.signIn(user).perform();
-                        final QbUser dbUser = QbUser.fromQbUser(user);
-                        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                realm.copyToRealm(dbUser);
-                            }
-                        });
-
-                        return dbUser;
+                        try{
+                            QBUser respoUser = QBUsers.signIn(user).perform();
+                            respoUser.setPassword(user.getPassword());
+                            QbUser dbUser = QbUser.fromQbUser(respoUser);
+                            UserDbHelper.getInstance().saveUserToDb(dbUser);
+                            return dbUser;
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            throw new Exception(getErrorMessage(e.getMessage()));
+                        }
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static void getUsers(){
+    private static String getErrorMessage(String exceptionMsg) {
+        if (!TextUtils.isEmpty(exceptionMsg))
+            switch (exceptionMsg) {
+                case "Unauthorized":
+                    return "Email or password combination is wrong";
 
-        //Observable.fromArray(new ArrayList<QBUsers>).
+                default:
+                    return "Something went wrong...";
+            }
+
+        return "Something went wrong...";
+    }
+
+    public static Observable getUsers(){
+
+        final ArrayList<QbUser> userList=new ArrayList<>();
 
         QBPagedRequestBuilder pagedRequestBuilder=new QBPagedRequestBuilder();
         pagedRequestBuilder.setPage(1);
@@ -79,12 +93,8 @@ public class QbUserAuth {
 
         QBUsers.getUsers(pagedRequestBuilder).performAsync(new QBEntityCallback<ArrayList<QBUser>>() {
             @Override
-            public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle) {
-                if(qbUsers!=null && qbUsers.size()>0){
-                    for(QBUser user:qbUsers){
-                        Log.e(TAG,user.getFullName());
-                    }
-                }
+            public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle){
+
             }
 
             @Override
@@ -92,5 +102,17 @@ public class QbUserAuth {
 
             }
         });
+
+/*
+        Observable.just(userList).flatMapIterable(new Function<Object, Iterable<?>>() {
+            @Override
+            public Iterable<?> apply(Object o) throws Exception {
+                return null;
+            }
+        });
+*/
+
+
+
     }
 }

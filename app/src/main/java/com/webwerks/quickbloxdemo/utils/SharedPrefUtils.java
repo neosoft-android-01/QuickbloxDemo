@@ -1,8 +1,13 @@
-package com.webwerks.qbcore.utils;
+package com.webwerks.quickbloxdemo.utils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
+import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.users.model.QBUser;
+import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.quickbloxdemo.global.App;
 
 /**
  * Created by webwerks on 11/4/17.
@@ -30,7 +35,7 @@ public class SharedPrefUtils {
 
     private SharedPrefUtils() {
         instance = this;
-        //sharedPreferences = getInstance().getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = App.getAppInstance().getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     public void save(String key, Object value) {
@@ -62,15 +67,27 @@ public class SharedPrefUtils {
         editor.clear().commit();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) sharedPreferences.getAll().get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key, T defValue) {
+        T returnValue = (T) sharedPreferences.getAll().get(key);
+        return returnValue == null ? defValue : returnValue;
+    }
+
+
     public boolean has(String key) {
         return sharedPreferences.contains(key);
     }
 
-    public void saveQbUser(QBUser qbUser) {
-        save(QB_USER_ID, qbUser.getId());
-        save(QB_USER_EMAIL, qbUser.getEmail());
-        save(QB_USER_PASSWORD, qbUser.getPassword());
-        save(QB_USER_FULL_NAME, qbUser.getFullName());
+    public void saveQbUser(QbUser qbUser) {
+        save(QB_USER_ID, qbUser.id);
+        save(QB_USER_EMAIL, qbUser.email);
+        save(QB_USER_PASSWORD, qbUser.password);
+        save(QB_USER_FULL_NAME, qbUser.email);
     }
 
     public void removeQbUser() {
@@ -80,6 +97,28 @@ public class SharedPrefUtils {
         delete(QB_USER_FULL_NAME);
     }
 
+    public boolean hasQbUser() {
+        return has(QB_USER_EMAIL) && has(QB_USER_PASSWORD);
+    }
+
+    public QbUser getQbUser() {
+        if (hasQbUser()) {
+            Integer id = get(QB_USER_ID);
+            String email=get(QB_USER_EMAIL);
+            String password = get(QB_USER_PASSWORD);
+            String fullName = get(QB_USER_FULL_NAME);
+
+            QbUser user = new QbUser();
+            user.id=id;
+            user.email=email;
+            user.fullName=fullName;
+            user.password=password;
+
+            return user;
+        } else {
+            return null;
+        }
+    }
 }
 
 

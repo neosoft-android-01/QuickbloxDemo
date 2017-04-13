@@ -11,7 +11,7 @@
         android:theme="@style/AppTheme"
         android:name=".global.App">
 
-        <activity android:name=".auth.LoginActivity"
+        <activity android:name=".ui.activities.SplashActivity"
             android:label="@string/app_name">
 
             <intent-filter>
@@ -19,6 +19,10 @@
                 <category android:name="android.intent.category.LAUNCHER"></category>
             </intent-filter>
 
+        </activity>
+
+        <activity android:name=".auth.LoginActivity"
+            android:label="@string/app_name">
         </activity>
 
         <activity android:name=".auth.SignUpActivity"

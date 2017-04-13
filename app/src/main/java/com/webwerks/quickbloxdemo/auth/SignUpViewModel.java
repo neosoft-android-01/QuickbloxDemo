@@ -29,13 +29,23 @@ public class SignUpViewModel {
     }
 
     public void onSignUpClick(){
+        App.getAppInstance().showLoading(mContext);
         QbUserAuth.createNewUser(signupBinding.getUser().getQBUser()).subscribe(new Consumer<QbUser>() {
             @Override
             public void accept(QbUser qbUser) throws Exception {
-                Log.d("QB_USER",qbUser.fullName+"");
-                App.getAppInstance().setCurrentUser(qbUser);
-                Toast.makeText(mContext,"User Registered successfully",Toast.LENGTH_SHORT).show();
-                navigateNext();
+                App.getAppInstance().hideLoading();
+                if(qbUser!=null) {
+                    App.getAppInstance().setCurrentUser(qbUser);
+                    Toast.makeText(mContext, "User Registered successfully", Toast.LENGTH_SHORT).show();
+                    navigateNext();
+                }
+
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                App.getAppInstance().hideLoading();
+                Toast.makeText(mContext, throwable.getMessage() +"", Toast.LENGTH_SHORT).show();
             }
         });
     }
