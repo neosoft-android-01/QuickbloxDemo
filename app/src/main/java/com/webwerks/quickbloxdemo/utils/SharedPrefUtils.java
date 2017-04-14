@@ -2,11 +2,8 @@ package com.webwerks.quickbloxdemo.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.quickblox.core.helper.StringifyArrayList;
-import com.quickblox.users.model.QBUser;
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.quickbloxdemo.global.App;
 
 /**
@@ -83,7 +80,7 @@ public class SharedPrefUtils {
         return sharedPreferences.contains(key);
     }
 
-    public void saveQbUser(QbUser qbUser) {
+    public void saveQbUser(User qbUser) {
         save(QB_USER_ID, qbUser.id);
         save(QB_USER_EMAIL, qbUser.email);
         save(QB_USER_PASSWORD, qbUser.password);
@@ -101,14 +98,14 @@ public class SharedPrefUtils {
         return has(QB_USER_EMAIL) && has(QB_USER_PASSWORD);
     }
 
-    public QbUser getQbUser() {
+    public User getQbUser() {
         if (hasQbUser()) {
             Integer id = get(QB_USER_ID);
             String email=get(QB_USER_EMAIL);
             String password = get(QB_USER_PASSWORD);
             String fullName = get(QB_USER_FULL_NAME);
 
-            QbUser user = new QbUser();
+            User user = new User();
             user.id=id;
             user.email=email;
             user.fullName=fullName;

@@ -2,79 +2,94 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-        <variable name="viewModel" type="com.webwerks.quickbloxdemo.auth.LoginViewModel" />
-        <variable name="user" type="com.webwerks.quickbloxdemo.model.CustomQbUser"/>
+
+        <variable
+            name="viewModel"
+            type="com.webwerks.quickbloxdemo.auth.LoginViewModel" />
+
+        <variable
+            name="user"
+            type="com.webwerks.quickbloxdemo.model.CustomQbUser" />
     </data>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp">
+        android:orientation="vertical">
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/ti_email"
+        <include layout="@layout/toolbar"></include>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/ti_edt_email"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/ti_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
-                android:text="@={user.email}"/>
+                android:layout_marginTop="10dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/ti_edt_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Email"
+                    android:text="@={user.email}" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/ti_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp">
+            </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/ti_edt_password"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/ti_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:text="@={user.password}"/>
+                android:layout_marginTop="10dp">
 
-        </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/ti_edt_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:text="@={user.password}" />
 
-        <Button
-            android:id="@+id/btn_login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Login"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:layout_marginTop="20dp"
-            android:textColor="@android:color/white"
-            android:onClick="@{() -> viewModel.onLoginClick()}" />
+            </android.support.design.widget.TextInputLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="OR"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="10dp" />
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:background="@color/colorPrimary"
+                android:onClick="@{() -> viewModel.onLoginClick()}"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Login"
+                android:textColor="@android:color/white" />
 
-        <Button
-            android:id="@+id/btn_sign_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create New User"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:textColor="@android:color/white"
-            android:onClick="@{() -> viewModel.onCreateNewUser()}"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="OR"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btn_sign_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/colorPrimary"
+                android:onClick="@{() -> viewModel.onCreateNewUser()}"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Create New User"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

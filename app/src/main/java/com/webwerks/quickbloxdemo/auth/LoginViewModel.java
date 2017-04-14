@@ -2,10 +2,9 @@ package com.webwerks.quickbloxdemo.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
 import com.webwerks.quickbloxdemo.chat.UserListActivity;
 import com.webwerks.quickbloxdemo.databinding.ActivityLoginBinding;
@@ -30,9 +29,9 @@ public class LoginViewModel {
 
     public void onLoginClick(){
         App.getAppInstance().showLoading(mContext);
-        QbUserAuth.login(loginBinding.getUser().getQBUser()).subscribe(new Consumer<QbUser>() {
+        QbUserAuth.login(loginBinding.getUser().getQBUser()).subscribe(new Consumer<User>() {
             @Override
-            public void accept(QbUser qbUser) throws Exception {
+            public void accept(User qbUser) throws Exception {
                 App.getAppInstance().hideLoading();
                 if (qbUser != null) {
                     App.getAppInstance().setCurrentUser(qbUser);

@@ -1,6 +1,8 @@
 package com.webwerks.qbcore.database;
 
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
+
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -16,30 +18,33 @@ public class UserDbHelper {
     public static UserDbHelper getInstance(){
         if(instance==null)
             instance=new UserDbHelper();
-
-
         return instance;
     }
 
-   /* public UserDbHelper(){
-        if(realm==null)
-        realm=Realm.getDefaultInstance();
-    }*/
-
-    public void saveUserToDb(final QbUser dbUser){
+    public void saveUserToDb(final User dbUser){
         try{
             realmInstance=Realm.getDefaultInstance();
             realmInstance.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    realm.copyToRealm(dbUser);
+
+                    // check user is present in DB then save
+                    User user=realm.where(User.class).equalTo("id",dbUser.id).findFirst();
+                    if(user!=null) {
+                        realm.copyToRealm(dbUser);
+                    }
                 }
             });
         }finally {
             if(realmInstance!=null)
                 realmInstance.close();
         }
+    }
 
+    public void saveUserToDb(final List<User> userList){
+       for(User user:userList){
+           saveUserToDb(user);
+       }
     }
 
 }

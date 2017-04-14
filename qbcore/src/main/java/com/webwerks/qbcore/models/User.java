@@ -1,6 +1,5 @@
 package com.webwerks.qbcore.models;
 
-import com.google.gson.annotations.SerializedName;
 import com.quickblox.users.model.QBUser;
 
 import java.util.Date;
@@ -11,9 +10,9 @@ import io.realm.RealmObject;
  * Created by webwerks on 12/4/17.
  */
 
-public class QbUser extends RealmObject{
+public class User extends RealmObject{
     
-    public QbUser(){}
+    public User(){}
 
     public int id;
     public String fullName;
@@ -34,9 +33,9 @@ public class QbUser extends RealmObject{
 
 
 
-    public static QbUser fromQbUser(QBUser qbUser){
+    public static User fromQbUser(QBUser qbUser){
         
-        QbUser thisU = new QbUser();
+        User thisU = new User();
         thisU.id=qbUser.getId();
         thisU.fullName=qbUser.getFullName();
         thisU.email=qbUser.getEmail();

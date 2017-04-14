@@ -1,18 +1,16 @@
 package com.webwerks.qbcore.user;
 
-import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.database.UserDbHelper;
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -28,15 +26,15 @@ public class QbUserAuth {
 
     public static String TAG="QbUserAuth";
 
-    public static Single<QbUser> createNewUser(final QBUser user){
+    public static Single<User> createNewUser(final QBUser user){
         return Single.just(user)
-                .map(new Function<QBUser, QbUser>() {
+                .map(new Function<QBUser, User>() {
                     @Override
-                    public QbUser apply(QBUser user) throws Exception {
+                    public User apply(QBUser user) throws Exception {
                         try {
                             QBUser respoUser = QBUsers.signUp(user).perform();
                             respoUser.setPassword(user.getPassword());
-                            QbUser dbUser = QbUser.fromQbUser(respoUser);
+                            User dbUser = User.fromQbUser(respoUser);
                             UserDbHelper.getInstance().saveUserToDb(dbUser);
                             return dbUser;
                         }catch (Exception e){
@@ -49,15 +47,15 @@ public class QbUserAuth {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Single<QbUser> login(QBUser user){
+    public static Single<User> login(QBUser user){
         return Single.just(user)
-                .map(new Function<QBUser, QbUser>() {
+                .map(new Function<QBUser, User>() {
                     @Override
-                    public QbUser apply(QBUser user) throws Exception {
+                    public User apply(QBUser user) throws Exception {
                         try{
                             QBUser respoUser = QBUsers.signIn(user).perform();
                             respoUser.setPassword(user.getPassword());
-                            QbUser dbUser = QbUser.fromQbUser(respoUser);
+                            User dbUser = User.fromQbUser(respoUser);
                             UserDbHelper.getInstance().saveUserToDb(dbUser);
                             return dbUser;
                         }catch (Exception e){
@@ -66,6 +64,38 @@ public class QbUserAuth {
                         }
                     }
                 })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable getUsers() {
+        final ArrayList<User> userList=new ArrayList<>();
+        return Observable.fromCallable(new Callable<List<User>>() {
+            @Override
+            public List<User> call() throws Exception {
+                try {
+                    QBPagedRequestBuilder pagedRequestBuilder = new QBPagedRequestBuilder();
+                    pagedRequestBuilder.setPage(1);
+                    pagedRequestBuilder.setPerPage(50);
+
+                    List<QBUser> respoList = QBUsers.getUsers(pagedRequestBuilder).perform();
+                    if(respoList!=null && respoList.size()>0){
+                        for(QBUser user:respoList){
+                            userList.add(User.fromQbUser(user));
+                        }
+                    }
+
+                    UserDbHelper.getInstance().saveUserToDb(userList);
+
+                    return userList;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new Exception(getErrorMessage(e.getMessage()));
+                }
+
+
+            }
+        })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -81,38 +111,5 @@ public class QbUserAuth {
             }
 
         return "Something went wrong...";
-    }
-
-    public static Observable getUsers(){
-
-        final ArrayList<QbUser> userList=new ArrayList<>();
-
-        QBPagedRequestBuilder pagedRequestBuilder=new QBPagedRequestBuilder();
-        pagedRequestBuilder.setPage(1);
-        pagedRequestBuilder.setPerPage(50);
-
-        QBUsers.getUsers(pagedRequestBuilder).performAsync(new QBEntityCallback<ArrayList<QBUser>>() {
-            @Override
-            public void onSuccess(ArrayList<QBUser> qbUsers, Bundle bundle){
-
-            }
-
-            @Override
-            public void onError(QBResponseException e) {
-
-            }
-        });
-
-/*
-        Observable.just(userList).flatMapIterable(new Function<Object, Iterable<?>>() {
-            @Override
-            public Iterable<?> apply(Object o) throws Exception {
-                return null;
-            }
-        });
-*/
-
-
-
     }
 }

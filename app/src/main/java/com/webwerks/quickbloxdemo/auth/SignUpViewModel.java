@@ -2,11 +2,9 @@ package com.webwerks.quickbloxdemo.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.quickblox.core.exception.QBResponseException;
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
 import com.webwerks.quickbloxdemo.chat.UserListActivity;
 import com.webwerks.quickbloxdemo.databinding.ActivitySignupBinding;
@@ -30,9 +28,9 @@ public class SignUpViewModel {
 
     public void onSignUpClick(){
         App.getAppInstance().showLoading(mContext);
-        QbUserAuth.createNewUser(signupBinding.getUser().getQBUser()).subscribe(new Consumer<QbUser>() {
+        QbUserAuth.createNewUser(signupBinding.getUser().getQBUser()).subscribe(new Consumer<User>() {
             @Override
-            public void accept(QbUser qbUser) throws Exception {
+            public void accept(User qbUser) throws Exception {
                 App.getAppInstance().hideLoading();
                 if(qbUser!=null) {
                     App.getAppInstance().setCurrentUser(qbUser);

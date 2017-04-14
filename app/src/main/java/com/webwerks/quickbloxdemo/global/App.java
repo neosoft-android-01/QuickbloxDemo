@@ -6,9 +6,8 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
 
-import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.auth.QBInitialization;
-import com.webwerks.qbcore.models.QbUser;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
 
@@ -20,15 +19,15 @@ import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
 public class App extends Application {
 
     private static App appInstance;
-    private QbUser currentUser=null;
+    private User currentUser=null;
 
-    public QbUser getCurrentUser() {
+    public User getCurrentUser() {
         if(currentUser==null)
             currentUser=SharedPrefUtils.getInstance().getQbUser();
         return currentUser;
     }
 
-    public void setCurrentUser(QbUser currentUser) {
+    public void setCurrentUser(User currentUser) {
         this.currentUser = currentUser;
         SharedPrefUtils.getInstance().saveQbUser(currentUser);
     }
