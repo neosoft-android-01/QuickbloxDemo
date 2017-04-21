@@ -48,7 +48,10 @@ public class QBInitialization {
 
     public void initRealm(){
         Realm.init(mContext);
-        RealmConfiguration configuration=new RealmConfiguration.Builder().build();
+        RealmConfiguration configuration=new RealmConfiguration.Builder()
+                .schemaVersion(0)
+                .deleteRealmIfMigrationNeeded()
+                .build();
         Realm.setDefaultConfiguration(configuration);
     }
 

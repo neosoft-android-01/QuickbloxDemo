@@ -2,24 +2,30 @@
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
+    <data class="UserBinding">
+        <variable
+            name="viewModel"
+            type="com.webwerks.quickbloxdemo.chat.UsersViewModel"/>
+
         <variable
             name="user"
             type="com.webwerks.qbcore.models.User"/>
     </data>
 
     <LinearLayout
+        android:id="@+id/ll_root"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:onClick="@{() -> viewModel.onUserClick(user)}">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@{user.fullName}"
             android:textColor="@color/colorPrimary"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
     </LinearLayout>
 

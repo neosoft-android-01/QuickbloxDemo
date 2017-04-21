@@ -5,6 +5,7 @@ import com.quickblox.users.model.QBUser;
 import java.util.Date;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by webwerks on 12/4/17.
@@ -14,6 +15,7 @@ public class User extends RealmObject{
     
     public User(){}
 
+    @PrimaryKey
     public int id;
     public String fullName;
     public String email;
@@ -57,6 +59,26 @@ public class User extends RealmObject{
         return thisU;
     }
 
-
+    public static QBUser toQBUser(User user){
+        QBUser qbUser=new QBUser();
+        qbUser.setId(user.id);
+        qbUser.setFullName(user.fullName);
+        qbUser.setEmail(user.email);
+        qbUser.setLogin(user.login);
+        qbUser.setPhone(user.phone);
+        qbUser.setWebsite(user.website);
+        qbUser.setLastRequestAt(user.lastRequestAt);
+        qbUser.setExternalId(user.externalId);
+        qbUser.setFacebookId(user.facebookId);
+        qbUser.setTwitterId(user.twitterId);
+        qbUser.setTwitterDigitsId(user.twitterDigitsId);
+        qbUser.setFileId(user.blobId);
+        //thisU.tags=qbUser.getTags();
+        qbUser.setPassword(user.password);
+        qbUser.setOldPassword(user.oldPassword);
+        qbUser.setCustomData(user.customData);
+        //thisU.customDataClass= (Class) qbUser.getCustomDataAsObject();
+        return qbUser;
+    }
 
 }

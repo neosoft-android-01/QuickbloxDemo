@@ -6,8 +6,8 @@ import android.widget.Toast;
 
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
-import com.webwerks.quickbloxdemo.chat.UserListActivity;
-import com.webwerks.quickbloxdemo.databinding.ActivityLoginBinding;
+import com.webwerks.quickbloxdemo.chat.AllUsersActivity;
+import com.webwerks.quickbloxdemo.databinding.LoginBinding;
 import com.webwerks.quickbloxdemo.global.App;
 
 import io.reactivex.functions.Consumer;
@@ -19,10 +19,10 @@ import io.reactivex.functions.Consumer;
 
 public class LoginViewModel {
 
-    private ActivityLoginBinding loginBinding;
+    private LoginBinding loginBinding;
     Activity mContext;
 
-    public LoginViewModel(Activity context,ActivityLoginBinding binding){
+    public LoginViewModel(Activity context,LoginBinding binding){
         loginBinding=binding;
         mContext=context;
     }
@@ -53,7 +53,7 @@ public class LoginViewModel {
     }
 
     public void navigateNext(){
-        mContext.startActivity(new Intent(mContext, UserListActivity.class));
+        mContext.startActivity(new Intent(mContext, AllUsersActivity.class));
         mContext.finish();
     }
 

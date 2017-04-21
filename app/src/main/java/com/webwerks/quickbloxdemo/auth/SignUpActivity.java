@@ -1,9 +1,7 @@
 package com.webwerks.quickbloxdemo.auth;
 
-import android.databinding.DataBindingUtil;
-
 import com.webwerks.quickbloxdemo.R;
-import com.webwerks.quickbloxdemo.databinding.ActivitySignupBinding;
+import com.webwerks.quickbloxdemo.databinding.SignUpBinding;
 import com.webwerks.quickbloxdemo.model.CustomQbUser;
 import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
 
@@ -11,7 +9,7 @@ import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
  * Created by webwerks on 7/4/17.
  */
 
-public class SignUpActivity extends BaseActivity {
+public class SignUpActivity extends BaseActivity<SignUpBinding> {
 
     @Override
     public int getContentLayout() {
@@ -19,9 +17,10 @@ public class SignUpActivity extends BaseActivity {
     }
 
     @Override
-    public void initializeUiComponents() {
-        ActivitySignupBinding signupBinding= DataBindingUtil.setContentView(this,getContentLayout());
-        signupBinding.setUser(new CustomQbUser());
-        signupBinding.setViewModel(new SignUpViewModel(this,signupBinding));
+    public void initializeUiComponents(SignUpBinding binding) {
+        binding.setUser(new CustomQbUser());
+        binding.setViewModel(new SignUpViewModel(this,binding));
     }
+
+
 }

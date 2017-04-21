@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,7 @@ import android.widget.ArrayAdapter;
 
 import com.webwerks.qbcore.models.User;
 import com.webwerks.quickbloxdemo.R;
-import com.webwerks.quickbloxdemo.databinding.UserListItemBinding;
+import com.webwerks.quickbloxdemo.databinding.UserBinding;
 
 import java.util.List;
 
@@ -31,9 +32,11 @@ public class UsersAdapter extends ArrayAdapter<User> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        UserListItemBinding binding= DataBindingUtil
+        UserBinding binding= DataBindingUtil
                 .inflate(LayoutInflater.from(mContext), R.layout.user_list_item,parent,false);
         binding.setUser(getItem(position));
+        binding.setViewModel(new UsersViewModel(mContext) );
+
         return binding.getRoot();
     }
 }

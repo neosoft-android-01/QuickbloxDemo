@@ -29,10 +29,12 @@ public class UserDbHelper {
                 public void execute(Realm realm) {
 
                     // check user is present in DB then save
-                    User user=realm.where(User.class).equalTo("id",dbUser.id).findFirst();
+                    /*User user=realm.where(User.class).equalTo("id",dbUser.id).findFirst();
                     if(user!=null) {
                         realm.copyToRealm(dbUser);
-                    }
+                    }*/
+
+                    realm.copyToRealmOrUpdate(dbUser);
                 }
             });
         }finally {

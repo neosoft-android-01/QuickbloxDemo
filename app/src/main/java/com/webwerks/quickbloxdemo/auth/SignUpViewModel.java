@@ -6,8 +6,8 @@ import android.widget.Toast;
 
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
-import com.webwerks.quickbloxdemo.chat.UserListActivity;
-import com.webwerks.quickbloxdemo.databinding.ActivitySignupBinding;
+import com.webwerks.quickbloxdemo.chat.AllUsersActivity;
+import com.webwerks.quickbloxdemo.databinding.SignUpBinding;
 import com.webwerks.quickbloxdemo.global.App;
 
 import io.reactivex.functions.Consumer;
@@ -18,10 +18,10 @@ import io.reactivex.functions.Consumer;
 
 public class SignUpViewModel {
 
-    private ActivitySignupBinding signupBinding;
+    private SignUpBinding signupBinding;
     Activity mContext;
 
-    public SignUpViewModel(Activity context,ActivitySignupBinding binding){
+    public SignUpViewModel(Activity context,SignUpBinding binding){
         signupBinding=binding;
         mContext=context;
     }
@@ -49,7 +49,7 @@ public class SignUpViewModel {
     }
 
     public void navigateNext(){
-        mContext.startActivity(new Intent(mContext, UserListActivity.class));
+        mContext.startActivity(new Intent(mContext, AllUsersActivity.class));
         mContext.finish();
     }
 }

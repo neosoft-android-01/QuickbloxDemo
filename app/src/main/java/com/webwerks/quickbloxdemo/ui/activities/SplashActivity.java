@@ -7,10 +7,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.webwerks.qbcore.chat.ChatManager;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.auth.LoginActivity;
-import com.webwerks.quickbloxdemo.chat.UserListActivity;
+import com.webwerks.quickbloxdemo.chat.AllUsersActivity;
+import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by webwerks on 13/4/17.
@@ -42,11 +47,36 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void navigateNext(){
-        finish();
         if(SharedPrefUtils.getInstance().hasQbUser()){
-            startActivity(new Intent(this, UserListActivity.class));
+            restoreChatSession();
         }else{
             startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
+    }
+
+    public void restoreChatSession(){
+        if(ChatManager.getInstance().isLogged()){
+            startActivity(new Intent(this, AllUsersActivity.class));
+            finish();
+        }else{
+            loginChat();
+        }
+
+    }
+
+    public void loginChat(){
+        ChatManager.getInstance().loginToChat(App.getAppInstance().getCurrentUser()).subscribe(new Consumer<User>() {
+            @Override
+            public void accept(User user) throws Exception {
+                startActivity(new Intent(SplashActivity.this, AllUsersActivity.class));
+                finish();
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                loginChat();
+            }
+        });
     }
 }
