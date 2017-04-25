@@ -1,5 +1,6 @@
 package com.webwerks.qbcore.chat;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.quickblox.chat.QBChatService;
@@ -7,8 +8,10 @@ import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
 import com.quickblox.chat.listeners.QBChatDialogMessageSentListener;
 import com.quickblox.chat.listeners.QBChatDialogTypingListener;
+import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.users.model.QBUser;
+import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.User;
 
 import org.jivesoftware.smack.ConnectionListener;
@@ -17,6 +20,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -27,6 +31,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ChatManager {
 
+    private static Context mContext;
+
     public static String TAG="ChatManager";
     public static ChatManager instance;
 
@@ -35,7 +41,8 @@ public class ChatManager {
     private QBChatDialogTypingListener privateChatTypingListener;
     private QBChatDialogMessageSentListener privateChatMsgSentListener;
 
-    public static ChatManager getInstance(){
+    public static ChatManager getInstance(Context context){
+        mContext=context;
         if(instance==null) {
             instance = new ChatManager();
         }
@@ -49,6 +56,7 @@ public class ChatManager {
     private void initChatService(){
         QBChatService.ConfigurationBuilder configurationBuilder=new QBChatService.ConfigurationBuilder();
         configurationBuilder.setKeepAlive(true).setSocketTimeout(0);
+        configurationBuilder.setUseTls(true);
         QBChatService.setConfigurationBuilder(configurationBuilder);
         QBChatService.setDebugEnabled(true);
         QBChatService.setDefaultPacketReplyTimeout(10000);
@@ -60,12 +68,16 @@ public class ChatManager {
         chatService.setUseStreamManagement(true);
     }
 
-    public boolean isLogged() {
-        return QBChatService.getInstance().isLoggedIn();
+    public void sendMessage(ChatDialog dialog){
+
     }
 
-    public static Observable getRecentChatList(){
-       return ChatDialogManager.getRecentChatDialogs();
+    public  Observable createChatDialog(User user){
+        return ChatDialogManager.createChatDialogFromUser(User.toQBUser(user));
+    }
+
+    public boolean isLogged() {
+        return QBChatService.getInstance().isLoggedIn();
     }
 
     public Single<User> loginToChat(User user){

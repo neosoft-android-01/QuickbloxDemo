@@ -6,7 +6,7 @@ import android.widget.Toast;
 
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
-import com.webwerks.quickbloxdemo.chat.AllUsersActivity;
+import com.webwerks.quickbloxdemo.chat.DashboardActivity;
 import com.webwerks.quickbloxdemo.databinding.LoginBinding;
 import com.webwerks.quickbloxdemo.global.App;
 
@@ -53,7 +53,7 @@ public class LoginViewModel {
     }
 
     public void navigateNext(){
-        mContext.startActivity(new Intent(mContext, AllUsersActivity.class));
+        mContext.startActivity(new Intent(mContext, DashboardActivity.class));
         mContext.finish();
     }
 

@@ -29,9 +29,8 @@
             android:label="@string/app_name">
         </activity>
 
-        <activity android:name=".chat.AllUsersActivity"
-            android:label="@string/app_name">
-        </activity>
+        <activity android:name=".chat.DashboardActivity"
+            android:label="@string/app_name"></activity>
 
         <activity android:name=".chat.ChatActivity"
             android:label="@string/app_name">
