@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.chat;
+package com.webwerks.quickbloxdemo.dashboard;
 
 import android.databinding.BindingAdapter;
 import android.support.design.widget.TabLayout;

@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.chat;
+package com.webwerks.quickbloxdemo.dashboard;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

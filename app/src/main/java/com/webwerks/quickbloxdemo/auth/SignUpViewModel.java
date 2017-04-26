@@ -6,7 +6,7 @@ import android.widget.Toast;
 
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
-import com.webwerks.quickbloxdemo.chat.DashboardActivity;
+import com.webwerks.quickbloxdemo.dashboard.DashboardActivity;
 import com.webwerks.quickbloxdemo.databinding.SignUpBinding;
 import com.webwerks.quickbloxdemo.global.App;
 

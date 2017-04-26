@@ -54,7 +54,6 @@ public class ChatDialogDbHelper {
         }
     }
 
-
     public Observable getAllDialogs(){
 
         return Observable.fromCallable(new Callable<List<ChatDialog>>() {
@@ -85,49 +84,16 @@ public class ChatDialogDbHelper {
             public ChatDialog call() throws Exception {
                 try{
                     realmInstance=Realm.getDefaultInstance();
-
-
-
-                    //realmInstance.beginTransaction();
                     ChatDialog chatDialog=realmInstance.where(ChatDialog.class).equalTo("dialogId",dialogId).findFirst();
-                    String str=chatDialog.getDialogId();
-                    //realmInstance.cancelTransaction();
                     return realmInstance.copyFromRealm(chatDialog);
                 }catch (Exception e){
                     e.printStackTrace();
                     throw new Exception(e.getLocalizedMessage());
                 }
-                /*finally {
-                    if(realmInstance!=null)
-                        realmInstance.close();
-                }*/
-
             }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-
-      /*  return Single.just(dialogId)
-                .map(new Function<String, ChatDialog>() {
-                    @Override
-                    public ChatDialog apply(String dialogId) throws Exception {
-
-                        try{
-                            realmInstance=Realm.getDefaultInstance();
-                            realmInstance.beginTransaction();
-                            ChatDialog chatDialog=realmInstance.where(ChatDialog.class).equalTo("dialogId",dialogId).findFirst();
-                            realmInstance.cancelTransaction();
-                            return chatDialog;
-                        }finally {
-                            if(realmInstance!=null)
-                                realmInstance.close();
-                            //throw new Exception("");
-                        }
-
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());*/
     }
 
 }

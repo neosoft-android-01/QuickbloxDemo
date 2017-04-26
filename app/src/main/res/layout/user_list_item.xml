@@ -5,7 +5,7 @@
     <data class="UserBinding">
         <variable
             name="viewModel"
-            type="com.webwerks.quickbloxdemo.chat.UsersViewModel"/>
+            type="com.webwerks.quickbloxdemo.dashboard.UsersViewModel"/>
 
         <variable
             name="user"

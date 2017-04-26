@@ -1,7 +1,10 @@
 package com.webwerks.quickbloxdemo.chat;
 
-import com.quickblox.chat.model.QBChatMessage;
+import android.widget.ListView;
+
 import com.webwerks.qbcore.chat.ChatDialogManager;
+import com.webwerks.qbcore.chat.ChatManager;
+import com.webwerks.qbcore.chat.IncomingMessageListener;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.quickbloxdemo.R;
@@ -17,9 +20,11 @@ import io.reactivex.functions.Consumer;
  * Created by webwerks on 17/4/17.
  */
 
-public class ChatActivity extends BaseActivity<ChatBinding> {
+public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingMessageListener {
 
     ChatDialog currentDialog;
+    ChatAdapterList adapter;
+    ArrayList<ChatMessages> messages;
 
     @Override
     public int getContentLayout() {
@@ -34,25 +39,46 @@ public class ChatActivity extends BaseActivity<ChatBinding> {
             @Override
             public void accept(Object o) throws Exception {
                 currentDialog= (ChatDialog) o;
+                ChatManager.getInstance().initSession(currentDialog,ChatActivity.this);
 
-                binding.setViewModel(new ChatViewModel(ChatActivity.this,binding,currentDialog));
                 ChatDialogManager.getDialogMessages(currentDialog).subscribe(new Consumer() {
                     @Override
                     public void accept(Object o) throws Exception {
-                        ArrayList<ChatMessages> messages = (ArrayList<ChatMessages>) o;
+                        messages = (ArrayList<ChatMessages>) o;
+                        binding.setViewModel(new ChatViewModel(ChatActivity.this,binding,currentDialog));
 
+                         adapter = new ChatAdapterList(ChatActivity.this,messages);
+                        ((ListView)findViewById(R.id.lst_chat)).setAdapter(adapter);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-
                     }
                 });
 
             }
         });
+    }
 
+    public void scrollMessageListDown(){
+        ((ListView)findViewById(R.id.lst_chat)).smoothScrollToPosition(messages.size()-1);
+    }
 
+    public void showMessages(ChatMessages msg){
+        if (adapter != null) {
+            adapter.add(msg);
+            scrollMessageListDown();
+        }
+    }
 
+    @Override
+    public void onMessageReceived(ChatMessages messages) {
+        showMessages(messages);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ChatManager.getInstance().stopSession(currentDialog);
     }
 }

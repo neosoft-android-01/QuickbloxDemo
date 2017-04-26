@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.chat;
+package com.webwerks.quickbloxdemo.dashboard;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,6 +10,7 @@ import com.quickblox.chat.model.QBChatDialog;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.User;
+import com.webwerks.quickbloxdemo.chat.ChatActivity;
 import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 
@@ -30,7 +31,7 @@ public class UsersViewModel {
     }
 
     public void onUserClick(User user){
-        ChatManager.getInstance(mContext).createChatDialog(user).subscribe(new Consumer() {
+        ChatManager.getInstance().createChatDialog(user).subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
                 ChatDialog dialog = (ChatDialog) o;

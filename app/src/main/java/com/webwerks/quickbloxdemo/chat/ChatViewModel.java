@@ -6,7 +6,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.webwerks.qbcore.chat.ChatDialogManager;
+import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
+import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
 
 import io.reactivex.functions.Consumer;
@@ -29,10 +31,11 @@ public class ChatViewModel {
     }
 
     public void onSendMsgClick(final EditText msg){
-        Toast.makeText(mContext,"SEND: "+ msg.getText().toString(),Toast.LENGTH_SHORT).show();
-        ChatDialogManager.sendMessage(chatDialog,msg.getText().toString()).subscribe(new Consumer() {
+        ChatManager.getInstance().sendMessage(chatDialog,msg.getText().toString()).subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
+                ChatMessages chatMessages= (ChatMessages) o;
+                ((ChatActivity)mContext).showMessages(chatMessages);
                 msg.setText("");
             }
         }, new Consumer<Throwable>() {
@@ -42,5 +45,7 @@ public class ChatViewModel {
             }
         });
     }
+
+
 
 }

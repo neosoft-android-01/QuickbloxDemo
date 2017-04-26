@@ -11,7 +11,7 @@ import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.User;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.auth.LoginActivity;
-import com.webwerks.quickbloxdemo.chat.DashboardActivity;
+import com.webwerks.quickbloxdemo.dashboard.DashboardActivity;
 import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
 
@@ -56,7 +56,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void restoreChatSession(){
-        if(ChatManager.getInstance(this).isLogged()){
+        if(ChatManager.getInstance().isLogged()){
             startActivity(new Intent(this, DashboardActivity.class));
             finish();
         }else{
@@ -66,7 +66,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void loginChat(){
-        ChatManager.getInstance(this).loginToChat(App.getAppInstance().getCurrentUser()).subscribe(new Consumer<User>() {
+        ChatManager.getInstance().loginToChat(App.getAppInstance().getCurrentUser()).subscribe(new Consumer<User>() {
             @Override
             public void accept(User user) throws Exception {
                 startActivity(new Intent(SplashActivity.this, DashboardActivity.class));

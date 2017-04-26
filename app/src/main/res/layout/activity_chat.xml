@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data class="ChatBinding">
+        <!--<import type="android.databinding.ObservableArrayList"/>
+        <import type="com.webwerks.qbcore.models.ChatMessages"></import>
+        <variable
+            name="messages"
+            type="ObservableArrayList&lt;ChatMessages&gt;"></variable>-->
+
         <variable
             name="viewModel"
             type="com.webwerks.quickbloxdemo.chat.ChatViewModel"/>
-
-        <variable
-            name="data"
-            type="com.webwerks.qbcore.models.ChatMessages"/>
 
     </data>
 
@@ -25,17 +28,29 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v7.widget.RecyclerView
+            <!--<android.support.v7.widget.RecyclerView
                 android:id="@+id/lst_chat"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                />-->
+
+            <ListView
+                android:id="@+id/lst_chat"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:padding="5dp"
+                android:layout_above="@+id/ll_send"
+                android:stackFromBottom="true"
+                android:dividerHeight="5dp"/>
 
             <LinearLayout
                 android:id="@+id/ll_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_alignParentBottom="true">
+                android:layout_alignParentBottom="true"
+                >
 
                 <EditText
                     android:id="@+id/edt_msg"
@@ -57,7 +72,6 @@
         </RelativeLayout>
 
     </LinearLayout>
-
 
 </layout>
 

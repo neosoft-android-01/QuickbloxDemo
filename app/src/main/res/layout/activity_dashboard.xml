@@ -7,7 +7,7 @@
         <import type="android.view.View"></import>
         <variable
             name="activity"
-            type="com.webwerks.quickbloxdemo.chat.DashboardActivity"/>
+            type="com.webwerks.quickbloxdemo.dashboard.DashboardActivity"/>
         
         <variable
             name="manager"

@@ -135,7 +135,7 @@ public class ChatDialogManager {
 
         return Observable.fromCallable(new Callable() {
             @Override
-            public Object call() throws Exception {
+            public ChatMessages call() throws Exception {
                 try {
                     QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
                     chatDialog.initForChat(QBChatService.getInstance());
@@ -146,7 +146,7 @@ public class ChatDialogManager {
                     chatMessage.setDateSent(System.currentTimeMillis() / 1000);
                     chatMessage.setMarkable(true);
                     chatDialog.sendMessage(chatMessage);
-                    return new Object();
+                    return ChatMessages.getChatMessage(chatMessage);
                 } catch (SmackException.NotConnectedException e) {
                     e.printStackTrace();
                     throw new Exception(e.getLocalizedMessage());

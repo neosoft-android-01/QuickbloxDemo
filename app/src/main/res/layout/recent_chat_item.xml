@@ -4,7 +4,7 @@
     <data class="RecentBinding">
         <variable
             name="viewModel"
-            type="com.webwerks.quickbloxdemo.chat.UsersViewModel"/>
+            type="com.webwerks.quickbloxdemo.dashboard.UsersViewModel"/>
 
         <variable
             name="chat"

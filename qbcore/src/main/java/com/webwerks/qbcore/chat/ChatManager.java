@@ -1,17 +1,17 @@
 package com.webwerks.qbcore.chat;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBIncomingMessagesManager;
+import com.quickblox.chat.QBSystemMessagesManager;
 import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
-import com.quickblox.chat.listeners.QBChatDialogMessageSentListener;
-import com.quickblox.chat.listeners.QBChatDialogTypingListener;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
+import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.qbcore.models.User;
 
 import org.jivesoftware.smack.ConnectionListener;
@@ -20,7 +20,6 @@ import org.jivesoftware.smack.XMPPConnection;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -31,18 +30,15 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ChatManager {
 
-    private static Context mContext;
-
     public static String TAG="ChatManager";
+
     public static ChatManager instance;
+    private IncomingMessageListener messageReceivedListener;
+    private ChatMessageListener chatMessageListener;
 
     private QBChatService chatService;
-    private QBChatDialogMessageListener privateChatMsgListener;
-    private QBChatDialogTypingListener privateChatTypingListener;
-    private QBChatDialogMessageSentListener privateChatMsgSentListener;
 
-    public static ChatManager getInstance(Context context){
-        mContext=context;
+    public static ChatManager getInstance(){
         if(instance==null) {
             instance = new ChatManager();
         }
@@ -51,6 +47,32 @@ public class ChatManager {
 
     public ChatManager(){
         initChatService();
+    }
+
+    private class ChatMessageListener implements QBChatDialogMessageListener {
+        @Override
+        public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
+            messageReceivedListener.onMessageReceived(ChatMessages.getChatMessage(qbChatMessage));
+        }
+
+        @Override
+        public void processError(String s, QBChatException e, QBChatMessage qbChatMessage, Integer integer) {
+        }
+    }
+
+    public void initSession(ChatDialog dialog,IncomingMessageListener listener){
+        QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
+
+        chatDialog.initForChat(QBChatService.getInstance());
+        chatMessageListener=new ChatMessageListener();
+        chatDialog.addMessageListener(chatMessageListener);
+
+        messageReceivedListener=listener;
+    }
+
+    public void stopSession(ChatDialog dialog){
+        QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
+        chatDialog.removeMessageListrener(chatMessageListener);
     }
 
     private void initChatService(){
@@ -68,8 +90,8 @@ public class ChatManager {
         chatService.setUseStreamManagement(true);
     }
 
-    public void sendMessage(ChatDialog dialog){
-
+    public Observable sendMessage( ChatDialog dialog,  String msg){
+        return ChatDialogManager.sendMessage(dialog,msg);
     }
 
     public  Observable createChatDialog(User user){
@@ -81,7 +103,6 @@ public class ChatManager {
     }
 
     public Single<User> loginToChat(User user){
-
         QBUser qbUser=User.toQBUser(user);
         return Single.just(qbUser)
                 .map(new Function<QBUser, User>() {
@@ -103,54 +124,6 @@ public class ChatManager {
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    private void initMessageSentListener() {
-        privateChatMsgSentListener = new QBChatDialogMessageSentListener() {
-            @Override
-            public void processMessageSent(String dialogId, QBChatMessage qbChatMessage) {
-                Log.d(TAG,"message " + qbChatMessage.getId() + " sent to dialog " + dialogId);
-            }
-
-            @Override
-            public void processMessageFailed(String dialogId, QBChatMessage qbChatMessage) {
-                Log.d(TAG,"send message " + qbChatMessage.getId() + " has failed to dialog " + dialogId);
-            }
-        };
-
-    }
-
-    private void initPrivateChatListener(){
-        privateChatMsgListener=new QBChatDialogMessageListener() {
-            @Override
-            public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
-                Log.d(TAG,"received message: " + qbChatMessage.getId());
-
-                if (qbChatMessage.getSenderId().equals(chatService.getUser().getId())) {
-                    Log.d(TAG,"Message comes here from carbons");
-                }
-            }
-
-            @Override
-            public void processError(String s, QBChatException e, QBChatMessage qbChatMessage, Integer integer) {
-                Log.d(TAG,"processError: " + e.getLocalizedMessage());
-            }
-        };
-    }
-
-    private void initIsTypingListener() {
-        // Create 'is typing' listener
-        privateChatTypingListener = new QBChatDialogTypingListener() {
-            @Override
-            public void processUserIsTyping(String dialogId, Integer senderId) {
-                Log.d(TAG,"user " + senderId + " is typing. Private dialog id: " + dialogId);
-            }
-
-            @Override
-            public void processUserStopTyping(String dialogId, Integer senderId) {
-                Log.d(TAG,"user " + senderId + " stop typing. Private dialog id: " + dialogId);
-            }
-        };
     }
 
     private ConnectionListener chatConnectionListener=new ConnectionListener() {

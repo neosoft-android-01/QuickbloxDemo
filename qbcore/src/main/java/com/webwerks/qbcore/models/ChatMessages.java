@@ -132,8 +132,10 @@ public class ChatMessages {
         chatMessages.setId(qbChatMessage.getId());
         chatMessages.setChatDialogId(qbChatMessage.getDialogId());
         chatMessages.setDateSent(qbChatMessage.getDateSent());
-        chatMessages.setDeliveredIds((List<Integer>) qbChatMessage.getDeliveredIds());
-        chatMessages.setReadIds((List<Integer>) qbChatMessage.getReadIds());
+        if(qbChatMessage.getDeliveredIds()!=null)
+            chatMessages.setDeliveredIds((List<Integer>) qbChatMessage.getDeliveredIds());
+        if(qbChatMessage.getReadIds()!=null)
+            chatMessages.setReadIds((List<Integer>) qbChatMessage.getReadIds());
         chatMessages.setMsg(qbChatMessage.getBody());
         chatMessages.setRecipientId(qbChatMessage.getRecipientId());
         chatMessages.setSenderId(qbChatMessage.getSenderId());
