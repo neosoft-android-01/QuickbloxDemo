@@ -37,11 +37,11 @@ public class AllUsersFragment extends BaseFragment<UserListBinding> {
 
     @Override
     public void initializeUiComponents(final UserListBinding binding) {
-        App.getAppInstance().showLoading(getActivity());
+        //App.getAppInstance().showLoading(getActivity());
         QbUserAuth.getUsers().subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
-                App.getAppInstance().hideLoading();
+                //App.getAppInstance().hideLoading();
                 ArrayList<User> users= (ArrayList<User>) o;
                 binding.setUsers(ListUtils.getInstance().convertToObservableList(users));
             }

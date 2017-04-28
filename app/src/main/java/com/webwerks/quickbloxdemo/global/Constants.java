@@ -7,4 +7,7 @@ package com.webwerks.quickbloxdemo.global;
 public class Constants {
 
     public static final String EXTRA_DIALOG_ID="DIALOG_ID";
+
+    public static final int CAMERA_IMAGE = 501;
+    public static final int GALLERY_IMAGE = 502;
 }

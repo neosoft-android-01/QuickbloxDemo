@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.chat;
+package com.webwerks.quickbloxdemo.chat.attachment;
 
 /**
  * Created by webwerks on 26/4/17.

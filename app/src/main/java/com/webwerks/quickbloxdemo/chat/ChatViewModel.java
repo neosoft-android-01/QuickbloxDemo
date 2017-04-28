@@ -1,15 +1,25 @@
 package com.webwerks.quickbloxdemo.chat;
 
+import android.Manifest;
 import android.app.Activity;
-import android.text.Editable;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.quickbloxdemo.chat.attachment.AttachmentDialog;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
+import com.webwerks.quickbloxdemo.global.Constants;
+import com.webwerks.quickbloxdemo.utils.FileUtil;
+import com.webwerks.quickbloxdemo.utils.PermissionManager;
+
+import java.io.File;
 
 import io.reactivex.functions.Consumer;
 
@@ -23,6 +33,7 @@ public class ChatViewModel {
     private ChatBinding chatBinding;
     private Activity mContext;
     private ChatDialog chatDialog;
+    private static File imageFile;
 
     public ChatViewModel(Activity context, ChatBinding binding, ChatDialog dialog){
         chatBinding=binding;
@@ -31,21 +42,75 @@ public class ChatViewModel {
     }
 
     public void onSendMsgClick(final EditText msg){
-        ChatManager.getInstance().sendMessage(chatDialog,msg.getText().toString()).subscribe(new Consumer() {
-            @Override
-            public void accept(Object o) throws Exception {
-                ChatMessages chatMessages= (ChatMessages) o;
-                ((ChatActivity)mContext).showMessages(chatMessages);
-                msg.setText("");
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
+        if(!TextUtils.isEmpty(msg.getText())) {
 
+            ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null).subscribe(new Consumer() {
+                @Override
+                public void accept(Object o) throws Exception {
+                    ChatMessages chatMessages = (ChatMessages) o;
+                    ((ChatActivity) mContext).showMessages(chatMessages);
+                    msg.setText("");
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+
+                }
+            });
+        }
+    }
+
+    public void onAttachmentClick(){
+        final AttachmentDialog dialog = new AttachmentDialog(mContext);
+        dialog.setAttachmentListener(new AttachmentDialog.AttachmentListener() {
+            @Override
+            public void onPhotoCameraClick() {
+                if (PermissionManager.askForPermissions(0, mContext,
+                        new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
+                        "Do you want to access camera ?")) {
+                    openCameraForPhoto();
+                }
+            }
+
+            @Override
+            public void onGalleryClick() {
+                if (PermissionManager.askForPermission(2, mContext,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE, "Do you want to access gallery ?")){
+                    openGallery(mContext);
+                }
             }
         });
+        dialog.show();
     }
 
 
+    private void openGallery(Activity activity) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
+        activity.startActivityForResult(intent, Constants.GALLERY_IMAGE);
+    }
+
+    private void openCameraForPhoto() {
+        Intent imageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (imageIntent.resolveActivity(mContext.getPackageManager()) != null) {
+            imageFile = FileUtil.getImageFile();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                imageIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri contentUri = FileProvider.getUriForFile(mContext,"com.webwerks.quickbloxdemo" , imageFile);
+                imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
+            } else {
+                imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
+            }
+
+            mContext.startActivityForResult(imageIntent,Constants.CAMERA_IMAGE);
+        }
+
+    }
+
+    public static File getImageFile(){
+        return imageFile;
+    }
 
 }

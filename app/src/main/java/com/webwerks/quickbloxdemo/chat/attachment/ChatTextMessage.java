@@ -1,4 +1,4 @@
-package com.webwerks.quickbloxdemo.chat;
+package com.webwerks.quickbloxdemo.chat.attachment;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

@@ -1,8 +1,10 @@
 package com.webwerks.qbcore.models;
 
+import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
 import com.webwerks.qbcore.utils.RealmHelper;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +27,7 @@ public class ChatMessages {
     private int read;
     private RealmList<RealmInteger> deliveredIds;
     private RealmList<RealmInteger> readIds;
+    private RealmList<RealmAttachment> attachments;
 
     public String getId() {
         return id;
@@ -114,6 +117,25 @@ public class ChatMessages {
         this.readIds = RealmHelper.getIntegerRelamList(readIds);
     }
 
+    public List<QBAttachment> getAttachments() {
+
+        List<QBAttachment> attachmentList=new ArrayList<>();
+        for(RealmAttachment attachment:attachments){
+            attachmentList.add(RealmAttachment.getQBAttachment(attachment));
+        }
+        return attachmentList;
+    }
+
+    public void setAttachments(List<QBAttachment> attachments) {
+
+        RealmList<RealmAttachment> attachmentList=new RealmList<>();
+        for(QBAttachment attachment:attachments){
+            attachmentList.add(RealmAttachment.getRealmAttachment(attachment));
+        }
+
+        this.attachments = attachmentList;
+    }
+
     public static QBChatMessage getQBChatMessage(ChatMessages messages){
         QBChatMessage qbChatMessage=new QBChatMessage();
         qbChatMessage.setId(messages.getId());
@@ -124,6 +146,7 @@ public class ChatMessages {
         qbChatMessage.setBody(messages.getMsg());
         qbChatMessage.setRecipientId(messages.getRecipientId());
         qbChatMessage.setSenderId(messages.getSenderId());
+        qbChatMessage.setAttachments(messages.getAttachments());
         return qbChatMessage;
     }
 
@@ -139,6 +162,7 @@ public class ChatMessages {
         chatMessages.setMsg(qbChatMessage.getBody());
         chatMessages.setRecipientId(qbChatMessage.getRecipientId());
         chatMessages.setSenderId(qbChatMessage.getSenderId());
+        chatMessages.setAttachments((List<QBAttachment>) qbChatMessage.getAttachments());
         return chatMessages;
     }
 

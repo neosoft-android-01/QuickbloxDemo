@@ -17,6 +17,8 @@ import com.webwerks.qbcore.models.User;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.XMPPConnection;
 
+import java.io.File;
+
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -62,10 +64,9 @@ public class ChatManager {
 
     public void initSession(ChatDialog dialog,IncomingMessageListener listener){
         QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
-
-        chatDialog.initForChat(QBChatService.getInstance());
         chatMessageListener=new ChatMessageListener();
         chatDialog.addMessageListener(chatMessageListener);
+        chatDialog.initForChat(chatService);
 
         messageReceivedListener=listener;
     }
@@ -90,9 +91,10 @@ public class ChatManager {
         chatService.setUseStreamManagement(true);
     }
 
-    public Observable sendMessage( ChatDialog dialog,  String msg){
-        return ChatDialogManager.sendMessage(dialog,msg);
+    public Observable sendMessage( ChatDialog dialog,  String msg,File filePath){
+        return ChatDialogManager.sendMessage(dialog,msg,filePath);
     }
+
 
     public  Observable createChatDialog(User user){
         return ChatDialogManager.createChatDialogFromUser(User.toQBUser(user));

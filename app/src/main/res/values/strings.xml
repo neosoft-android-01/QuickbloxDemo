@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">QuickbloxDemo</string>
+    <string-array name="arr_image_pick">
+        <item>Gallery</item>
+        <item>Camera</item>
+    </string-array>
 </resources>

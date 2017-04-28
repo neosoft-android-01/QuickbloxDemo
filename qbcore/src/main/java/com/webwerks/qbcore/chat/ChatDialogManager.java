@@ -1,13 +1,20 @@
 package com.webwerks.qbcore.chat;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBRestChatService;
+import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.request.QBMessageGetBuilder;
 import com.quickblox.chat.utils.DialogUtils;
+import com.quickblox.content.QBContent;
+import com.quickblox.content.model.QBFile;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.QBProgressCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBRequestGetBuilder;
 import com.quickblox.users.model.QBUser;
@@ -18,14 +25,19 @@ import com.webwerks.qbcore.utils.NetworkUtils;
 
 import org.jivesoftware.smack.SmackException;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -128,12 +140,49 @@ public class ChatDialogManager {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-
     }
 
-    public static Observable sendMessage(final ChatDialog dialog, final String msg) {
+    public static Observable sendMessage(final ChatDialog dialog, final String msg,final File filePath) {
 
-        return Observable.fromCallable(new Callable() {
+        try {
+            if (filePath != null) {
+                return Observable.fromCallable(new Callable<QBFile>(){
+                    @Override
+                    public QBFile call() throws Exception {
+
+                        return QBContent.uploadFileTask(filePath, false, "tag_1_hello", new QBProgressCallback() {
+                            @Override
+                            public void onProgressUpdate(int i) {
+                                Log.e("Progress",":::" + i);
+                            }
+                        }).perform();
+                    }
+                }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).concatMap(new Function<QBFile, ObservableSource<ChatMessages>>() {
+                    @Override
+                    public ObservableSource<ChatMessages> apply(QBFile qbFile) throws Exception {
+                        QBAttachment attachment = new QBAttachment("photo");
+                        attachment.setId(qbFile.getId().toString());
+
+                        return send(dialog, msg, attachment)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                });
+            } else {
+                return send(dialog, msg, null)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Observable<ChatMessages> send(final ChatDialog dialog, final String msg,final QBAttachment attachment){
+
+        return Observable.fromCallable(new Callable<ChatMessages>() {
             @Override
             public ChatMessages call() throws Exception {
                 try {
@@ -141,8 +190,14 @@ public class ChatDialogManager {
                     chatDialog.initForChat(QBChatService.getInstance());
 
                     QBChatMessage chatMessage = new QBChatMessage();
-                    chatMessage.setBody(msg);
-                    chatMessage.setProperty("save_to_history", "1");
+
+                    if(attachment!=null){
+                        chatMessage.addAttachment(attachment);
+                    }else{
+                        chatMessage.setBody(msg);
+                    }
+
+                    chatMessage.setSaveToHistory(true); // Save a message to history
                     chatMessage.setDateSent(System.currentTimeMillis() / 1000);
                     chatMessage.setMarkable(true);
                     chatDialog.sendMessage(chatMessage);
@@ -152,10 +207,7 @@ public class ChatDialogManager {
                     throw new Exception(e.getLocalizedMessage());
                 }
             }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-
+        });
     }
 
     public static Observable getDialogFromId(String id){
