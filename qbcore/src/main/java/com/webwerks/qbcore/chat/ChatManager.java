@@ -9,6 +9,8 @@ import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.chat.model.QBDialogType;
+import com.quickblox.core.helper.CollectionsUtil;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
@@ -18,6 +20,7 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.XMPPConnection;
 
 import java.io.File;
+import java.util.Iterator;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -70,6 +73,26 @@ public class ChatManager {
 
         messageReceivedListener=listener;
     }
+
+    public Integer getRecipientId(QBChatDialog chatDialog) {
+        if(chatDialog.getType() == QBDialogType.PRIVATE && !CollectionsUtil.isEmpty(chatDialog.getOccupants())) {
+            Iterator var1 = chatDialog.getOccupants().iterator();
+
+            Integer userId;
+            do {
+                if(!var1.hasNext()) {
+                    return Integer.valueOf(-1);
+                }
+
+                userId = (Integer)var1.next();
+            } while(this.chatService.getUser() == null || userId.equals(this.chatService.getUser().getId()));
+
+            return userId;
+        } else {
+            return Integer.valueOf(-1);
+        }
+    }
+
 
     public void stopSession(ChatDialog dialog){
         QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);

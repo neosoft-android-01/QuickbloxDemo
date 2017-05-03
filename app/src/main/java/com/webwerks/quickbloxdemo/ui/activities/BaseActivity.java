@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 import com.webwerks.quickbloxdemo.R;
 
@@ -15,8 +16,6 @@ import com.webwerks.quickbloxdemo.R;
 
 public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatActivity  {
 
-
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,7 +23,15 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
         //setContentView(getContentLayout());
         T binding= DataBindingUtil.setContentView(this,getContentLayout());
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_view));
+
         initializeUiComponents(binding);
+    }
+
+    public void setToolbarTitle(String title){
+        if((Toolbar) findViewById(R.id.toolbar_view)!=null){
+            TextView lblTitle= (TextView) ((Toolbar) findViewById(R.id.toolbar_view)).findViewById(R.id.lbl_title);
+            lblTitle.setText(title);
+        }
     }
 
     public abstract int getContentLayout();

@@ -38,7 +38,7 @@ public class AllUsersFragment extends BaseFragment<UserListBinding> {
     @Override
     public void initializeUiComponents(final UserListBinding binding) {
         //App.getAppInstance().showLoading(getActivity());
-        QbUserAuth.getUsers().subscribe(new Consumer() {
+        QbUserAuth.getUsers(App.getAppInstance().getCurrentUser()).subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
                 //App.getAppInstance().hideLoading();

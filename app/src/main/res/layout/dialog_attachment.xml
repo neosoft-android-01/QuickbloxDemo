@@ -19,4 +19,11 @@
         android:padding="15dp"
         android:text="Photo Gallery" />
 
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/btnLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="Location" />
+
 </LinearLayout>

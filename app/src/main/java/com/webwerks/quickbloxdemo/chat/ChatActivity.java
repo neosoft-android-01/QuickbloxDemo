@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ListView;
 
 import com.webwerks.qbcore.chat.ChatDialogManager;
@@ -15,8 +16,10 @@ import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
+import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
+import com.webwerks.quickbloxdemo.utils.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,9 +55,11 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                 currentDialog= (ChatDialog) o;
                 ChatManager.getInstance().initSession(currentDialog,ChatActivity.this);
 
+                App.getAppInstance().showLoading(ChatActivity.this);
                 ChatDialogManager.getDialogMessages(currentDialog).subscribe(new Consumer() {
                     @Override
                     public void accept(Object o) throws Exception {
+                        App.getAppInstance().hideLoading();
                         messages = (ArrayList<ChatMessages>) o;
                         binding.setViewModel(new ChatViewModel(ChatActivity.this,binding,currentDialog));
 
@@ -77,7 +82,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     }
 
     public void showMessages(ChatMessages msg){
-        if (adapter != null) {
+        if (adapter != null && !adapter.messages.contains(msg)) {
             adapter.add(msg);
             scrollMessageListDown();
         }
@@ -104,18 +109,27 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     break;
 
                 case Constants.GALLERY_IMAGE:
+                    if (requestCode == Constants.GALLERY_IMAGE && data != null && data.getData() != null) {
+                        FileUtil.MediaData mediaData = FileUtil.getPath(this, data.getData());
+
+                        if (mediaData != null && !TextUtils.isEmpty(mediaData.getType())
+                                && !TextUtils.isEmpty(mediaData.getPath())) {
+                            if (mediaData.getType().contains("image")) {
+                                imagePath= new File(mediaData.getPath());
+                            }
+                        }
+                    }
                     break;
             }
 
             if(imagePath!=null){
-
-
+                App.getAppInstance().showLoading(this);
                 ChatManager.getInstance().sendMessage(currentDialog, "",imagePath).subscribe(new Consumer() {
                     @Override
                     public void accept(Object o) throws Exception {
                         ChatMessages chatMessages = (ChatMessages) o;
-                        /*((ChatActivity) mContext).showMessages(chatMessages);
-                        msg.setText("");*/
+                        showMessages(chatMessages);
+                        App.getAppInstance().hideLoading();
                     }
                 }, new Consumer<Throwable>() {
                     @Override

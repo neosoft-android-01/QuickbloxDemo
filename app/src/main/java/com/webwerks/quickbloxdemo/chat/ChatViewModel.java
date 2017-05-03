@@ -14,6 +14,7 @@ import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.quickbloxdemo.chat.attachment.AttachmentDialog;
+import com.webwerks.quickbloxdemo.chat.location.SendLocationActivity;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.utils.FileUtil;
@@ -79,16 +80,20 @@ public class ChatViewModel {
                     openGallery(mContext);
                 }
             }
+
+            @Override
+            public void onLocationClick() {
+                mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
+            }
         });
         dialog.show();
     }
 
-
     private void openGallery(Activity activity) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
-        activity.startActivityForResult(intent, Constants.GALLERY_IMAGE);
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        activity.startActivityForResult(Intent.createChooser(intent, "Select Picture"), Constants.GALLERY_IMAGE);
     }
 
     private void openCameraForPhoto() {
@@ -98,12 +103,11 @@ public class ChatViewModel {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 imageIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Uri contentUri = FileProvider.getUriForFile(mContext,"com.webwerks.quickbloxdemo" , imageFile);
+                Uri contentUri = FileProvider.getUriForFile(mContext,mContext.getApplication().getPackageName()+".provider", imageFile);
                 imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
             } else {
                 imageIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
             }
-
             mContext.startActivityForResult(imageIntent,Constants.CAMERA_IMAGE);
         }
 

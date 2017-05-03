@@ -7,14 +7,16 @@
         android:id="@+id/img_attachment"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_placeholder"/>
 
     <TextView
         android:id="@+id/lblTime"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:textColor="@android:color/white"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        />
 
 </RelativeLayout>

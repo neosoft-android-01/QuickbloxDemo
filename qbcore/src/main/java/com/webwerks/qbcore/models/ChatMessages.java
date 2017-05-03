@@ -119,11 +119,16 @@ public class ChatMessages {
 
     public List<QBAttachment> getAttachments() {
 
-        List<QBAttachment> attachmentList=new ArrayList<>();
-        for(RealmAttachment attachment:attachments){
-            attachmentList.add(RealmAttachment.getQBAttachment(attachment));
+        if(attachments!=null) {
+
+            List<QBAttachment> attachmentList = new ArrayList<>();
+            for (RealmAttachment attachment : attachments) {
+                attachmentList.add(RealmAttachment.getQBAttachment(attachment));
+            }
+            return attachmentList;
+        }else{
+            return new ArrayList<>();
         }
-        return attachmentList;
     }
 
     public void setAttachments(List<QBAttachment> attachments) {
@@ -162,7 +167,8 @@ public class ChatMessages {
         chatMessages.setMsg(qbChatMessage.getBody());
         chatMessages.setRecipientId(qbChatMessage.getRecipientId());
         chatMessages.setSenderId(qbChatMessage.getSenderId());
-        chatMessages.setAttachments((List<QBAttachment>) qbChatMessage.getAttachments());
+        if(qbChatMessage.getAttachments()!=null)
+            chatMessages.setAttachments((List<QBAttachment>) qbChatMessage.getAttachments());
         return chatMessages;
     }
 

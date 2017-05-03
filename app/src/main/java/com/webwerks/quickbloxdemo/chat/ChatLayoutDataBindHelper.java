@@ -3,11 +3,13 @@ package com.webwerks.quickbloxdemo.chat;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
+import com.webwerks.qbcore.chat.AttachmentManager;
 import com.webwerks.qbcore.chat.OnAttachmentDownload;
 import com.webwerks.qbcore.models.ChatMessages;
 import com.webwerks.quickbloxdemo.R;
@@ -65,18 +67,28 @@ public class ChatLayoutDataBindHelper {
                 sent = false;
         }
 
-        FileUtil.getImageAttachmentPath(message.getAttachments().get(0).getId()).subscribe(new Consumer<String>() {
-            @Override
-            public void accept(String s) throws Exception {
-                Glide.with(context)
-                        .load(s)
-                        .error(R.mipmap.ic_launcher)
-                        .into(holder.imgAttachment);
-            }
-        });
+        FileUtil.getImageAttachmentPath(Integer.parseInt(message.getAttachments().get(0).getId()))
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        Glide.with(context)
+                                .load(s)
+                                .error(R.drawable.ic_placeholder)
+                                .into(holder.imgAttachment);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Glide.with(context)
+                                .load(R.drawable.ic_placeholder)
+                                .error(R.drawable.ic_placeholder)
+                                .placeholder(R.drawable.ic_placeholder)
+                                .into(holder.imgAttachment);
+                    }
+                });
 
         holder.lblTime.setText(DateUtils.getTimeText(message.getDateSent(),"chat"));
-        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(300, 350);
         params.topMargin=10;
 
         RelativeLayout.LayoutParams timeParams=new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

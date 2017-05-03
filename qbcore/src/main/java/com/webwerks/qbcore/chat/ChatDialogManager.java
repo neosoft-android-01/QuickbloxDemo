@@ -119,7 +119,7 @@ public class ChatDialogManager {
         return Observable.fromCallable(new Callable<List<ChatMessages>>() {
             @Override
             public List<ChatMessages> call() throws Exception {
-                QBMessageGetBuilder messageGetBuilder = new QBMessageGetBuilder();
+                QBRequestGetBuilder messageGetBuilder = new QBRequestGetBuilder();
                 messageGetBuilder.setLimit(500);
 
                 try {
@@ -149,7 +149,6 @@ public class ChatDialogManager {
                 return Observable.fromCallable(new Callable<QBFile>(){
                     @Override
                     public QBFile call() throws Exception {
-
                         return QBContent.uploadFileTask(filePath, false, "tag_1_hello", new QBProgressCallback() {
                             @Override
                             public void onProgressUpdate(int i) {
@@ -162,6 +161,10 @@ public class ChatDialogManager {
                     public ObservableSource<ChatMessages> apply(QBFile qbFile) throws Exception {
                         QBAttachment attachment = new QBAttachment("photo");
                         attachment.setId(qbFile.getId().toString());
+                        attachment.setUrl(qbFile.getPrivateUrl());
+
+                        Log.e("QBFILE",qbFile.getPrivateUrl() + ":::" + qbFile.getPublicUrl() + ":::" +
+                                QBFile.getPublicUrlForUID(qbFile.getUid()) + QBFile.getPrivateUrlForUID(qbFile.getUid()));
 
                         return send(dialog, msg, attachment)
                                 .subscribeOn(Schedulers.io())

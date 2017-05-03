@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
 import com.webwerks.quickbloxdemo.dashboard.DashboardActivity;
 import com.webwerks.quickbloxdemo.databinding.LoginBinding;
 import com.webwerks.quickbloxdemo.global.App;
+import com.webwerks.quickbloxdemo.ui.activities.SplashActivity;
 
 import io.reactivex.functions.Consumer;
 
@@ -35,8 +37,9 @@ public class LoginViewModel {
                 App.getAppInstance().hideLoading();
                 if (qbUser != null) {
                     App.getAppInstance().setCurrentUser(qbUser);
+                    loginChat();
                     Toast.makeText(mContext, "Hello " + qbUser.fullName, Toast.LENGTH_SHORT).show();
-                    navigateNext();
+
                 }
             }
         }, new Consumer<Throwable>() {
@@ -44,6 +47,20 @@ public class LoginViewModel {
             public void accept(Throwable throwable) throws Exception {
                 App.getAppInstance().hideLoading();
                 Toast.makeText(mContext, throwable.getMessage() +"", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void loginChat(){
+        ChatManager.getInstance().loginToChat(App.getAppInstance().getCurrentUser()).subscribe(new Consumer<User>() {
+            @Override
+            public void accept(User user) throws Exception {
+                navigateNext();
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                loginChat();
             }
         });
     }

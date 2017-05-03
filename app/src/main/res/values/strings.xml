@@ -4,4 +4,6 @@
         <item>Gallery</item>
         <item>Camera</item>
     </string-array>
+
+    <string name="google_maps_key">AIzaSyAJtZ_kO-cm39XbU88OSoE9gq_GKlbifbo</string>
 </resources>

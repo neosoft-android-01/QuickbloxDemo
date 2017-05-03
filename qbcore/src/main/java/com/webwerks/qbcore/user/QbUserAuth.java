@@ -68,7 +68,7 @@ public class QbUserAuth {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Observable getUsers() {
+    public static Observable getUsers(final User currentUser) {
         final ArrayList<User> userList=new ArrayList<>();
         return Observable.fromCallable(new Callable<List<User>>() {
             @Override
@@ -81,7 +81,9 @@ public class QbUserAuth {
                     List<QBUser> respoList = QBUsers.getUsers(pagedRequestBuilder).perform();
                     if(respoList!=null && respoList.size()>0){
                         for(QBUser user:respoList){
-                            userList.add(User.fromQbUser(user));
+
+                            if(user.getId()!=currentUser.id)
+                                userList.add(User.fromQbUser(user));
                         }
                     }
 
