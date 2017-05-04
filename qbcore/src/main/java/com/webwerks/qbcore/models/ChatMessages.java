@@ -2,6 +2,7 @@ package com.webwerks.qbcore.models;
 
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
+import com.webwerks.qbcore.utils.Constant;
 import com.webwerks.qbcore.utils.RealmHelper;
 
 import java.util.ArrayList;
@@ -28,6 +29,15 @@ public class ChatMessages {
     private RealmList<RealmInteger> deliveredIds;
     private RealmList<RealmInteger> readIds;
     private RealmList<RealmAttachment> attachments;
+    private LocationAttachment locationAttachment;
+
+    public LocationAttachment getLocationAttachment() {
+        return locationAttachment;
+    }
+
+    public void setLocationAttachment(LocationAttachment locationAttachment) {
+        this.locationAttachment = locationAttachment;
+    }
 
     public String getId() {
         return id;
@@ -169,6 +179,16 @@ public class ChatMessages {
         chatMessages.setSenderId(qbChatMessage.getSenderId());
         if(qbChatMessage.getAttachments()!=null)
             chatMessages.setAttachments((List<QBAttachment>) qbChatMessage.getAttachments());
+
+        if( (qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME) != null) ){
+
+            LocationAttachment locationAttachment=new LocationAttachment();
+            locationAttachment.setLocationName(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME).toString());
+            locationAttachment.setLocationDesc(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC).toString());
+            locationAttachment.setLatitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT).toString()));
+            locationAttachment.setLongitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG).toString()));
+        }
+
         return chatMessages;
     }
 

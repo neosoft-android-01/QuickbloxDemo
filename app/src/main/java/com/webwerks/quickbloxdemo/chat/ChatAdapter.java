@@ -29,7 +29,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     List<ChatMessages> messages;
     Context mContext;
-    private final int TEXT = 0, PHOTO = 1;
+    private final int TEXT = 0, PHOTO = 1,LOCATION=2;
 
     public ChatAdapter(Context context,List<ChatMessages> messagesList){
         mContext=context;
@@ -48,6 +48,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             case PHOTO:
                 View photoView=layoutInflater.inflate(R.layout.item_photo_msg,null);
                 return new PhotoChatHolder(photoView);
+
+            case LOCATION:
+                View locationView=layoutInflater.inflate(R.layout.item_location_msg,null);
+                return new LocationChatHolder(locationView);
 
             case TEXT:
                 default:
@@ -79,13 +83,25 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public int getItemViewType(int position) {
 
-        if(messages.get(position).getAttachments()!=null && messages.get(position).getAttachments().size()>0){
+        if(messages.get(position).getLocationAttachment()!=null){
+            return LOCATION;
+        }else if(messages.get(position).getAttachments()!=null && messages.get(position).getAttachments().size()>0){
             return PHOTO;
-        }else if(!TextUtils.isEmpty(messages.get(position).getMsg())){
+        } else if(!TextUtils.isEmpty(messages.get(position).getMsg())){
             return TEXT;
         }else{
             return TEXT;
         }
+
+       /* if(messages.get(position).getAttachments()!=null && messages.get(position).getAttachments().size()>0){
+            return PHOTO;
+        }else if(messages.get(position).getLocationAttachment()!=null){
+            return LOCATION;
+        } else if(!TextUtils.isEmpty(messages.get(position).getMsg())){
+            return TEXT;
+        }else{
+            return TEXT;
+        }*/
     }
 
     public static class TextChatHolder extends RecyclerView.ViewHolder{
@@ -104,6 +120,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             super(itemView);
             imgAttachment= (ImageView) itemView.findViewById(R.id.img_attachment);
             lblTime= (TextView) itemView.findViewById(R.id.lblTime);
+        }
+    }
+
+    public static class LocationChatHolder extends RecyclerView.ViewHolder{
+        ImageView imgLocationAttachment;
+        TextView lblLocationName,lblLocationDesc;
+        public LocationChatHolder(View itemView) {
+            super(itemView);
+            imgLocationAttachment= (ImageView) itemView.findViewById(R.id.img_location);
+            lblLocationName= (TextView) itemView.findViewById(R.id.lblLocationName);
+            lblLocationDesc= (TextView) itemView.findViewById(R.id.lblLocationDesc);
         }
     }
 

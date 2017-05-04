@@ -21,6 +21,8 @@ import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.database.ChatDialogDbHelper;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.LocationAttachment;
+import com.webwerks.qbcore.utils.Constant;
 import com.webwerks.qbcore.utils.NetworkUtils;
 
 import org.jivesoftware.smack.SmackException;
@@ -128,6 +130,12 @@ public class ChatDialogManager {
 
                     List<ChatMessages> messages=new ArrayList<ChatMessages>();
                     for(QBChatMessage chatMessage:chatMessages){
+
+                        Log.e("INFO",":::"+chatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME) + "::" +
+                                chatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC)+":::"+
+                                chatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT) + "::::" +
+                                chatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG) );
+
                         messages.add(ChatMessages.getChatMessage(chatMessage));
                     }
 
@@ -142,7 +150,8 @@ public class ChatDialogManager {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Observable sendMessage(final ChatDialog dialog, final String msg,final File filePath) {
+    public static Observable sendMessage(final ChatDialog dialog, final String msg, final File filePath
+            , final LocationAttachment locationAttachment,final ChatManager.AttachmentType attachmentType) {
 
         try {
             if (filePath != null) {
@@ -166,13 +175,13 @@ public class ChatDialogManager {
                         Log.e("QBFILE",qbFile.getPrivateUrl() + ":::" + qbFile.getPublicUrl() + ":::" +
                                 QBFile.getPublicUrlForUID(qbFile.getUid()) + QBFile.getPrivateUrlForUID(qbFile.getUid()));
 
-                        return send(dialog, msg, attachment)
+                        return send(dialog, msg, attachment,locationAttachment,attachmentType)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread());
                     }
                 });
             } else {
-                return send(dialog, msg, null)
+                return send(dialog, msg, null,locationAttachment,attachmentType)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread());
             }
@@ -183,7 +192,8 @@ public class ChatDialogManager {
         }
     }
 
-    public static Observable<ChatMessages> send(final ChatDialog dialog, final String msg,final QBAttachment attachment){
+    public static Observable<ChatMessages> send(final ChatDialog dialog, final String msg,
+                                                final QBAttachment attachment, final LocationAttachment locationAttachment, final ChatManager.AttachmentType attachmentType){
 
         return Observable.fromCallable(new Callable<ChatMessages>() {
             @Override
@@ -200,6 +210,14 @@ public class ChatDialogManager {
                         chatMessage.setBody(msg);
                     }
 
+                    if(attachmentType== ChatManager.AttachmentType.LOCATION) {
+                        chatMessage.setBody(Constant.CHAT_SHARE_LOCATION_MSG_BODY);
+                        //chatMessage.setProperty(Constant.QB_COSTOM_PARAM_IS_LOCATION_ATTACHED, "locationAttached");
+                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT, String.valueOf(locationAttachment.getLatitude()));
+                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG, String.valueOf(locationAttachment.getLongitude()));
+                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME, locationAttachment.getLocationName());
+                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC, locationAttachment.getLocationDesc());
+                    }
                     chatMessage.setSaveToHistory(true); // Save a message to history
                     chatMessage.setDateSent(System.currentTimeMillis() / 1000);
                     chatMessage.setMarkable(true);

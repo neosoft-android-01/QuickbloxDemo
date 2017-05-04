@@ -11,4 +11,5 @@ public class Constants {
 
     public static final int CAMERA_IMAGE = 501;
     public static final int GALLERY_IMAGE = 502;
+    public static final int PLACE_PICKER_REQUEST=503;
 }

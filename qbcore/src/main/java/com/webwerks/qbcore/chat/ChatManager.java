@@ -14,6 +14,7 @@ import com.quickblox.core.helper.CollectionsUtil;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.LocationAttachment;
 import com.webwerks.qbcore.models.User;
 
 import org.jivesoftware.smack.ConnectionListener;
@@ -42,6 +43,10 @@ public class ChatManager {
     private ChatMessageListener chatMessageListener;
 
     private QBChatService chatService;
+
+    public enum AttachmentType{
+       IMAGE,AUDIO,VIDEO,LOCATION,TEXT
+    }
 
     public static ChatManager getInstance(){
         if(instance==null) {
@@ -114,8 +119,8 @@ public class ChatManager {
         chatService.setUseStreamManagement(true);
     }
 
-    public Observable sendMessage( ChatDialog dialog,  String msg,File filePath){
-        return ChatDialogManager.sendMessage(dialog,msg,filePath);
+    public Observable sendMessage(ChatDialog dialog, String msg, File filePath, LocationAttachment locationAttachment,AttachmentType type){
+        return ChatDialogManager.sendMessage(dialog,msg,filePath,locationAttachment,type);
     }
 
 

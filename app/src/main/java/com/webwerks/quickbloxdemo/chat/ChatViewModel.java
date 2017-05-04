@@ -10,6 +10,9 @@ import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.widget.EditText;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.ChatMessages;
@@ -45,7 +48,8 @@ public class ChatViewModel {
     public void onSendMsgClick(final EditText msg){
         if(!TextUtils.isEmpty(msg.getText())) {
 
-            ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null).subscribe(new Consumer() {
+            ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null,
+                    null,ChatManager.AttachmentType.TEXT).subscribe(new Consumer() {
                 @Override
                 public void accept(Object o) throws Exception {
                     ChatMessages chatMessages = (ChatMessages) o;
@@ -83,7 +87,17 @@ public class ChatViewModel {
 
             @Override
             public void onLocationClick() {
-                mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
+
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    mContext.startActivityForResult(builder.build(mContext), Constants.PLACE_PICKER_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+
+                //mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
             }
         });
         dialog.show();
