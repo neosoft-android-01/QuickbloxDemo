@@ -95,7 +95,24 @@ public class SendMessageRequest {
                         .concatMap(new Function<QBFile, ObservableSource<Messages>>() {
                     @Override
                     public ObservableSource<Messages> apply(QBFile qbFile) throws Exception {
-                        QBAttachment attachment = new QBAttachment("photo");
+
+                        String attachmentType="";
+                        switch (type){
+                            case IMAGE:
+                            case LOCATION:
+                                attachmentType=QBAttachment.IMAGE_TYPE;
+                                break;
+
+                            case VIDEO:
+                                attachmentType=QBAttachment.VIDEO_TYPE;
+                                break;
+
+                            case AUDIO:
+                                attachmentType=QBAttachment.AUDIO_TYPE;
+                                break;
+                        }
+
+                        QBAttachment attachment = new QBAttachment(attachmentType);
                         attachment.setId(qbFile.getId().toString());
                         attachment.setUrl(qbFile.getPrivateUrl());
                         return sendMessage(attachment)

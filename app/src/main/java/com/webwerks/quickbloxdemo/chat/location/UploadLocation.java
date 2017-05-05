@@ -14,6 +14,7 @@ import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.models.LocationAttachment;
+import com.webwerks.quickbloxdemo.chat.ChatActivity;
 import com.webwerks.quickbloxdemo.global.App;
 
 import java.io.File;
@@ -37,8 +38,11 @@ public class UploadLocation {
 
     private static Observable<File> getLocationImage(Place place) {
         LatLng latLng = place.getLatLng();
-        final String locImage = "http://maps.google.com/maps/api/staticmap?markers=color:red|" +
-                latLng.latitude + "," + latLng.longitude + "&zoom=16&size=370x200&sensor=true";
+        /*final String locImage = "http://maps.google.com/maps/api/staticmap?markers=color:red|" +
+                latLng.latitude + "," + latLng.longitude + "&zoom=12&size=600x400&sensor=true";*/
+
+        final String locImage="https://maps.googleapis.com/maps/api/staticmap?center="
+                +latLng.latitude+","+latLng.longitude+"&markers=color:red|&zoom=12&size=600x400";
 
         return Observable.fromCallable(new Callable<File>() {
             @Override
@@ -99,7 +103,7 @@ public class UploadLocation {
                 sendRequest.send().subscribe(new Consumer<Messages>() {
                     @Override
                     public void accept(Messages messages) throws Exception {
-                        //showMessages(messages);
+                        (((ChatActivity)context)).showMessages(messages);
                         App.getAppInstance().hideLoading();
                     }
                 });

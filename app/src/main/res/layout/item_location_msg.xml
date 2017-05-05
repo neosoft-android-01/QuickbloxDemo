@@ -1,46 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ll_location_message"
-    android:layout_width="180dp"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="5dp"
-    android:visibility="visible">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/img_location"
-        android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_placeholder"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/rl_location_message"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="2dp">
+        android:padding="5dp"
+        android:layout_alignParentRight="true">
 
-        <TextView
-            android:id="@+id/lblLocationName"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:maxLines="1"
-            android:text="LocationName"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="14sp"
-            android:textStyle="bold"/>
+        <ImageView
+            android:id="@+id/img_location"
+            android:layout_width="200dp"
+            android:layout_height="160dp"
+            android:layout_alignParentRight="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_placeholder" />
 
-        <TextView
-            android:id="@+id/lblLocationDesc"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="2dp"
-            android:maxLines="1"
-            android:text="LocationDesc"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"/>
+        <LinearLayout
+            android:id="@+id/ll_info"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/img_location"
+            android:orientation="vertical"
+            android:padding="2dp">
 
+            <TextView
+                android:id="@+id/lblLocationName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="LocationName"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/lblLocationDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="LocationDesc"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
 
-</LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/lblTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        />
+
+</RelativeLayout>

@@ -38,13 +38,13 @@ import io.reactivex.functions.Consumer;
 
 public class ChatViewModel {
 
-    private ChatBinding chatBinding;
+   // private ChatBinding chatBinding;
     private Activity mContext;
     private ChatDialog chatDialog;
     private static File imageFile;
 
     public ChatViewModel(Activity context, ChatBinding binding, ChatDialog dialog){
-        chatBinding=binding;
+      //  chatBinding=binding;
         mContext=context;
         chatDialog=dialog;
     }
@@ -129,8 +129,25 @@ public class ChatViewModel {
                 }
                 //mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
             }
+
+            @Override
+            public void onAudioGalleryClick() {
+                openAudioGallery(mContext);
+            }
         });
         dialog.show();
+    }
+
+    private void openAudioGallery(Activity activity){
+        /*Intent intent = new Intent();
+        intent.setType("audio*//*");
+        String[] mimetypes = {"audio/3gp", "audio/AMR", "audio/mp3"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        activity.startActivityForResult(Intent.createChooser(intent, "Select Audio"), Constants.GALLERY_AUDIO);*/
+
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        activity.startActivityForResult(intent,Constants.GALLERY_AUDIO);
     }
 
     private void openGallery(Activity activity) {

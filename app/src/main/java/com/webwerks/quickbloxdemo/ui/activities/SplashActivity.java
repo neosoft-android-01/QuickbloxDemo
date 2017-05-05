@@ -1,5 +1,6 @@
 package com.webwerks.quickbloxdemo.ui.activities;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.auth.LoginActivity;
 import com.webwerks.quickbloxdemo.dashboard.DashboardActivity;
 import com.webwerks.quickbloxdemo.global.App;
+import com.webwerks.quickbloxdemo.utils.PermissionManager;
 import com.webwerks.quickbloxdemo.utils.SharedPrefUtils;
 
 import io.reactivex.functions.Consumer;
@@ -38,7 +40,10 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 try {
                     sleep(2000);
-                    navigateNext();
+                    if (PermissionManager.askForPermission(2, SplashActivity.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE, "Do you want to access gallery ?")){
+                        navigateNext();
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

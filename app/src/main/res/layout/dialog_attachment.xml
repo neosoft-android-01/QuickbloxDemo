@@ -26,4 +26,11 @@
         android:padding="15dp"
         android:text="Location" />
 
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/btnAudioGallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="Audio Gallery" />
+
 </LinearLayout>

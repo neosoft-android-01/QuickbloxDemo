@@ -74,7 +74,6 @@ public class AttachmentManager {
                             @Override
                             public void subscribe(ObservableEmitter<Integer> e) throws Exception {
                                 e.onNext(i);
-
                             }
                         }).subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())

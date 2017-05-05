@@ -21,6 +21,7 @@ public class AttachmentDialog extends BottomSheetDialog implements View.OnClickL
         findViewById(R.id.btnPhotoCamera).setOnClickListener(this);
         findViewById(R.id.btnGallery).setOnClickListener(this);
         findViewById(R.id.btnLocation).setOnClickListener(this);
+        findViewById(R.id.btnAudioGallery).setOnClickListener(this);
     }
 
     public void setAttachmentListener(AttachmentListener listener) {
@@ -42,6 +43,10 @@ public class AttachmentDialog extends BottomSheetDialog implements View.OnClickL
                 case R.id.btnLocation:
                     listener.onLocationClick();
                     break;
+
+                case R.id.btnAudioGallery:
+                    listener.onAudioGalleryClick();
+                    break;
             }
         }
         dismiss();
@@ -51,6 +56,7 @@ public class AttachmentDialog extends BottomSheetDialog implements View.OnClickL
         void onPhotoCameraClick();
         void onGalleryClick();
         void onLocationClick();
+        void onAudioGalleryClick();
     }
 }
 

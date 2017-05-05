@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -133,6 +134,13 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     Place place = PlacePicker.getPlace(data, this);
                     UploadLocation.sendLocation(this,currentDialog,place);
                     break;
+
+                case Constants.GALLERY_AUDIO:
+                    FileUtil.MediaData mediaData = FileUtil.getPath(this, data.getData());
+                    if (mediaData != null) {
+                       Log.e("PATH",mediaData.getPath() + "::::");
+                    }
+                    break;
             }
         }
     }
@@ -158,10 +166,13 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
 
                 @Override
                 public void onSubscribe(Disposable d) {
+                    Log.e("ON CHAT ACTIVITY","IMAGE UPLOAD::::::");
                 }
 
                 @Override
                 public void onNext(Integer value) {
+
+                    Log.e("ON CHAT ACTIVITY",value+ "IMAGE UPLOAD::::::");
                 }
 
                 @Override
