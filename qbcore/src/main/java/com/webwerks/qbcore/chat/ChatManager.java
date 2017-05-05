@@ -1,27 +1,14 @@
 package com.webwerks.qbcore.chat;
 
-import android.util.Log;
-
 import com.quickblox.chat.QBChatService;
-import com.quickblox.chat.QBIncomingMessagesManager;
-import com.quickblox.chat.QBSystemMessagesManager;
 import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
-import com.quickblox.chat.model.QBDialogType;
-import com.quickblox.core.helper.CollectionsUtil;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.ChatMessages;
-import com.webwerks.qbcore.models.LocationAttachment;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.models.User;
-
-import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.XMPPConnection;
-
-import java.io.File;
-import java.util.Iterator;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -44,10 +31,6 @@ public class ChatManager {
 
     private QBChatService chatService;
 
-    public enum AttachmentType{
-       IMAGE,AUDIO,VIDEO,LOCATION,TEXT
-    }
-
     public static ChatManager getInstance(){
         if(instance==null) {
             instance = new ChatManager();
@@ -62,7 +45,7 @@ public class ChatManager {
     private class ChatMessageListener implements QBChatDialogMessageListener {
         @Override
         public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
-            messageReceivedListener.onMessageReceived(ChatMessages.getChatMessage(qbChatMessage));
+            messageReceivedListener.onMessageReceived(Messages.getChatMessage(qbChatMessage));
         }
 
         @Override
@@ -79,26 +62,6 @@ public class ChatManager {
         messageReceivedListener=listener;
     }
 
-    public Integer getRecipientId(QBChatDialog chatDialog) {
-        if(chatDialog.getType() == QBDialogType.PRIVATE && !CollectionsUtil.isEmpty(chatDialog.getOccupants())) {
-            Iterator var1 = chatDialog.getOccupants().iterator();
-
-            Integer userId;
-            do {
-                if(!var1.hasNext()) {
-                    return Integer.valueOf(-1);
-                }
-
-                userId = (Integer)var1.next();
-            } while(this.chatService.getUser() == null || userId.equals(this.chatService.getUser().getId()));
-
-            return userId;
-        } else {
-            return Integer.valueOf(-1);
-        }
-    }
-
-
     public void stopSession(ChatDialog dialog){
         QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
         chatDialog.removeMessageListrener(chatMessageListener);
@@ -113,16 +76,11 @@ public class ChatManager {
         QBChatService.setDefaultPacketReplyTimeout(10000);
 
         chatService = QBChatService.getInstance();
-        chatService.addConnectionListener(chatConnectionListener);
+        //chatService.addConnectionListener(chatConnectionListener);
 
         // stream management
         chatService.setUseStreamManagement(true);
     }
-
-    public Observable sendMessage(ChatDialog dialog, String msg, File filePath, LocationAttachment locationAttachment,AttachmentType type){
-        return ChatDialogManager.sendMessage(dialog,msg,filePath,locationAttachment,type);
-    }
-
 
     public  Observable createChatDialog(User user){
         return ChatDialogManager.createChatDialogFromUser(User.toQBUser(user));
@@ -156,7 +114,7 @@ public class ChatManager {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private ConnectionListener chatConnectionListener=new ConnectionListener() {
+    /*private ConnectionListener chatConnectionListener=new ConnectionListener() {
         @Override
         public void connected(XMPPConnection xmppConnection) {
             Log.d(TAG,"CONNECTED");
@@ -193,6 +151,6 @@ public class ChatManager {
         public void reconnectionFailed(Exception e) {
             Log.d(TAG,"RECONNECTION ERROR " + e.getLocalizedMessage());
         }
-    };
+    };*/
 
 }

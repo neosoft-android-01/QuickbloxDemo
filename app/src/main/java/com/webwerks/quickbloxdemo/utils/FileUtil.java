@@ -152,22 +152,6 @@ public class FileUtil {
 
     }
 
-    private static String streamToString(InputStream stream){
-        try {
-            BufferedReader r = new BufferedReader(new InputStreamReader(stream));
-            StringBuilder total = new StringBuilder();
-            String line;
-            while ((line = r.readLine()) != null) {
-                total.append(line).append('\n');
-            }
-            return total.toString();
-        }catch (IOException e){
-            return e.getLocalizedMessage();
-        }
-
-    }
-
-
     public static MediaData getPath(final Context context, final Uri uri) {
         MediaData mediaData = new FileUtil().new MediaData();
 

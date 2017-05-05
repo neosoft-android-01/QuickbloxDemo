@@ -2,22 +2,18 @@ package com.webwerks.quickbloxdemo.chat;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.maps.model.LatLng;
 import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.IncomingMessageListener;
+import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.MessageType;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.location.UploadLocation;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
@@ -28,8 +24,13 @@ import com.webwerks.quickbloxdemo.utils.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -40,7 +41,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
 
     ChatDialog currentDialog;
     ChatAdapter adapter;
-    ArrayList<ChatMessages> messages;
+    ArrayList<Messages> messages;
     RecyclerView lstChat;
 
     @Override
@@ -65,7 +66,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     @Override
                     public void accept(Object o) throws Exception {
                         App.getAppInstance().hideLoading();
-                        messages = (ArrayList<ChatMessages>) o;
+                        messages = (ArrayList<Messages>) o;
                         binding.setViewModel(new ChatViewModel(ChatActivity.this, binding, currentDialog));
 
                         adapter = new ChatAdapter(ChatActivity.this, messages);
@@ -86,7 +87,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
         lstChat.smoothScrollToPosition(messages.size() - 1);
     }
 
-    public void showMessages(ChatMessages msg) {
+    public void showMessages(Messages msg) {
         if (adapter != null && !adapter.messages.contains(msg)) {
             adapter.add(msg);
             scrollMessageListDown();
@@ -94,7 +95,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     }
 
     @Override
-    public void onMessageReceived(ChatMessages messages) {
+    public void onMessageReceived(Messages messages) {
         showMessages(messages);
     }
 
@@ -130,24 +131,19 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
 
                 case Constants.PLACE_PICKER_REQUEST:
                     Place place = PlacePicker.getPlace(data, this);
-                    /*String toastMsg = String.format("Place: %s", place.getName());
-                    Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();*/
                     UploadLocation.sendLocation(this,currentDialog,place);
                     break;
             }
-
         }
-
     }
-
 
     public void sendImage(File imagePath) {
         if (imagePath != null) {
             App.getAppInstance().showLoading(this);
-            ChatManager.getInstance().sendMessage(currentDialog, "", imagePath, null,ChatManager.AttachmentType.IMAGE).subscribe(new Consumer() {
+            /*ChatManager.getInstance().sendMessage(currentDialog, "", imagePath, null,ChatManager.AttachmentType.IMAGE).subscribe(new Consumer() {
                 @Override
                 public void accept(Object o) throws Exception {
-                    ChatMessages chatMessages = (ChatMessages) o;
+                    Messages chatMessages = (Messages) o;
                     showMessages(chatMessages);
                     App.getAppInstance().hideLoading();
                 }
@@ -156,7 +152,38 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                 public void accept(Throwable throwable) throws Exception {
 
                 }
+            });*/
+
+            Observer progressObserver = new Observer<Integer>() {
+
+                @Override
+                public void onSubscribe(Disposable d) {
+                }
+
+                @Override
+                public void onNext(Integer value) {
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            };
+
+            SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,progressObserver)
+                .attachMedia(imagePath)
+                .messageType(MessageType.IMAGE).build();
+            sendRequest.send().subscribe(new Consumer<Messages>() {
+                @Override
+                public void accept(Messages messages) throws Exception {
+                    showMessages(messages);
+                    App.getAppInstance().hideLoading();
+                }
             });
+
         }
     }
 }

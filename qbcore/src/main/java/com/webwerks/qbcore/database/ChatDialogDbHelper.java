@@ -1,22 +1,15 @@
 package com.webwerks.qbcore.database;
 
-import com.quickblox.core.request.QBPagedRequestBuilder;
-import com.quickblox.users.QBUsers;
-import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by webwerks on 24/4/17.
@@ -55,7 +48,6 @@ public class ChatDialogDbHelper {
     }
 
     public Observable getAllDialogs(){
-
         return Observable.fromCallable(new Callable<List<ChatDialog>>() {
             @Override
             public List<ChatDialog> call() throws Exception {

@@ -3,15 +3,11 @@ package com.webwerks.quickbloxdemo.chat;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
-import com.webwerks.qbcore.chat.AttachmentManager;
-import com.webwerks.qbcore.chat.OnAttachmentDownload;
-import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.utils.DateUtils;
@@ -25,7 +21,7 @@ import io.reactivex.functions.Consumer;
 
 public class ChatLayoutDataBindHelper {
 
-    public static void configureTextViewHolder(Context context, ChatAdapter.TextChatHolder holder, ChatMessages message){
+    public static void configureTextViewHolder(Context context, ChatAdapter.TextChatHolder holder, Messages message){
         boolean sent=true;
         if(message.getSenderId()!=null) {
             if (message.getSenderId() == App.getAppInstance().getCurrentUser().id)
@@ -58,7 +54,7 @@ public class ChatLayoutDataBindHelper {
         holder.lblTime.setLayoutParams(timeParams);
     }
 
-    public static void configureImageAttachment(final Context context,final ChatAdapter.PhotoChatHolder holder,final ChatMessages message){
+    public static void configureImageAttachment(final Context context,final ChatAdapter.PhotoChatHolder holder,final Messages message){
         boolean sent=true;
         if(message.getSenderId()!=null) {
             if (message.getSenderId() == App.getAppInstance().getCurrentUser().id)
@@ -104,5 +100,9 @@ public class ChatLayoutDataBindHelper {
         }
         holder.imgAttachment.setLayoutParams(params);
         holder.lblTime.setLayoutParams(timeParams);
+    }
+
+    public static void configureLocation(final Context context, final ChatAdapter.LocationChatHolder holder, final Messages message){
+
     }
 }

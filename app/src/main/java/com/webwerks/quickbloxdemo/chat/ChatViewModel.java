@@ -14,17 +14,21 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.webwerks.qbcore.chat.ChatManager;
+import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.MessageType;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.quickbloxdemo.chat.attachment.AttachmentDialog;
-import com.webwerks.quickbloxdemo.chat.location.SendLocationActivity;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
+import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.utils.FileUtil;
 import com.webwerks.quickbloxdemo.utils.PermissionManager;
 
 import java.io.File;
 
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 
@@ -47,12 +51,40 @@ public class ChatViewModel {
 
     public void onSendMsgClick(final EditText msg){
         if(!TextUtils.isEmpty(msg.getText())) {
+            Observer progressObserver = new Observer<Integer>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+                }
 
-            ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null,
+                @Override
+                public void onNext(Integer value) {
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            };
+
+            SendMessageRequest sendRequest=new SendMessageRequest.Builder(chatDialog,progressObserver)
+                    .message(msg.getText().toString())
+                    .messageType(MessageType.TEXT).build();
+            sendRequest.send().subscribe(new Consumer<Messages>() {
+                @Override
+                public void accept(Messages messages) throws Exception {
+                    ((ChatActivity) mContext).showMessages(messages);
+                    msg.setText("");
+                }
+            });
+
+            /*ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null,
                     null,ChatManager.AttachmentType.TEXT).subscribe(new Consumer() {
                 @Override
                 public void accept(Object o) throws Exception {
-                    ChatMessages chatMessages = (ChatMessages) o;
+                    Messages chatMessages = (Messages) o;
                     ((ChatActivity) mContext).showMessages(chatMessages);
                     msg.setText("");
                 }
@@ -61,7 +93,7 @@ public class ChatViewModel {
                 public void accept(Throwable throwable) throws Exception {
 
                 }
-            });
+            });*/
         }
     }
 
@@ -87,7 +119,6 @@ public class ChatViewModel {
 
             @Override
             public void onLocationClick() {
-
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
                 try {
                     mContext.startActivityForResult(builder.build(mContext), Constants.PLACE_PICKER_REQUEST);
@@ -96,7 +127,6 @@ public class ChatViewModel {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
-
                 //mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
             }
         });

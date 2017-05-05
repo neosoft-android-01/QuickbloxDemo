@@ -27,13 +27,6 @@ public class UserDbHelper {
             realmInstance.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-
-                    // check user is present in DB then save
-                    /*User user=realm.where(User.class).equalTo("id",dbUser.id).findFirst();
-                    if(user!=null) {
-                        realm.copyToRealm(dbUser);
-                    }*/
-
                     realm.copyToRealmOrUpdate(dbUser);
                 }
             });

@@ -9,11 +9,12 @@ import android.text.TextUtils;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.webwerks.qbcore.chat.ChatManager;
+import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.MessageType;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.models.LocationAttachment;
 import com.webwerks.quickbloxdemo.global.App;
-import com.webwerks.quickbloxdemo.model.ShareLocationModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +23,9 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
@@ -71,10 +74,40 @@ public class UploadLocation {
                 location.setLocationName(TextUtils.isEmpty(place.getName())?"":place.getName().toString());
                 location.setLocationDesc(TextUtils.isEmpty(place.getAddress())?"":place.getAddress().toString());
 
-                ChatManager.getInstance().sendMessage(currentDialog, "", file, location,ChatManager.AttachmentType.LOCATION).subscribe(new Consumer() {
+                Observer progressObserver = new Observer<Integer>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(Integer value) {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                };
+
+                SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,progressObserver)
+                        .attachLocation(location)
+                        .messageType(MessageType.LOCATION).build();
+                sendRequest.send().subscribe(new Consumer<Messages>() {
+                    @Override
+                    public void accept(Messages messages) throws Exception {
+                        //showMessages(messages);
+                        App.getAppInstance().hideLoading();
+                    }
+                });
+
+                /*ChatManager.getInstance().sendMessage(currentDialog, "", file, location,ChatManager.AttachmentType.LOCATION).subscribe(new Consumer() {
                     @Override
                     public void accept(Object o) throws Exception {
-                        ChatMessages chatMessages = (ChatMessages) o;
+                        Messages chatMessages = (Messages) o;
                         //showMessages(chatMessages);
                         App.getAppInstance().hideLoading();
                     }
@@ -83,7 +116,7 @@ public class UploadLocation {
                     public void accept(Throwable throwable) throws Exception {
 
                     }
-                });
+                });*/
             }
         });
     }

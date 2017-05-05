@@ -64,4 +64,7 @@ public class LocationAttachment extends RealmObject{
     public void setUrl(String url) {
         this.url = url;
     }
+
+
+
 }

@@ -81,21 +81,16 @@ public class QbUserAuth {
                     List<QBUser> respoList = QBUsers.getUsers(pagedRequestBuilder).perform();
                     if(respoList!=null && respoList.size()>0){
                         for(QBUser user:respoList){
-
                             if(user.getId()!=currentUser.id)
                                 userList.add(User.fromQbUser(user));
                         }
                     }
-
                     UserDbHelper.getInstance().saveUserToDb(userList);
-
                     return userList;
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new Exception(getErrorMessage(e.getMessage()));
                 }
-
-
             }
         })
                 .subscribeOn(Schedulers.io())

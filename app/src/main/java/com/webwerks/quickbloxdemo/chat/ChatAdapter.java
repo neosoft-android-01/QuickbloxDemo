@@ -1,23 +1,17 @@
 package com.webwerks.quickbloxdemo.chat;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.webwerks.qbcore.models.ChatMessages;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.quickbloxdemo.R;
-import com.webwerks.quickbloxdemo.global.App;
-import com.webwerks.quickbloxdemo.utils.DateUtils;
 
 import java.util.List;
 
@@ -25,37 +19,37 @@ import java.util.List;
  * Created by webwerks on 24/4/17.
  */
 
-public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    List<ChatMessages> messages;
+    private final int TEXT = 0, PHOTO = 1, LOCATION = 2;
+    List<Messages> messages;
     Context mContext;
-    private final int TEXT = 0, PHOTO = 1,LOCATION=2;
 
-    public ChatAdapter(Context context,List<ChatMessages> messagesList){
-        mContext=context;
-        messages=messagesList;
+    public ChatAdapter(Context context, List<Messages> messagesList) {
+        mContext = context;
+        messages = messagesList;
     }
 
-    public void add(ChatMessages msg){
+    public void add(Messages msg) {
         messages.add(msg);
         notifyDataSetChanged();
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater=LayoutInflater.from(mContext);
+        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         switch (viewType) {
             case PHOTO:
-                View photoView=layoutInflater.inflate(R.layout.item_photo_msg,null);
+                View photoView = layoutInflater.inflate(R.layout.item_photo_msg, null);
                 return new PhotoChatHolder(photoView);
 
             case LOCATION:
-                View locationView=layoutInflater.inflate(R.layout.item_location_msg,null);
+                View locationView = layoutInflater.inflate(R.layout.item_location_msg, null);
                 return new LocationChatHolder(locationView);
 
             case TEXT:
-                default:
-                View textView=layoutInflater.inflate(R.layout.item_text_chat,null);
+            default:
+                View textView = layoutInflater.inflate(R.layout.item_text_chat, null);
                 return new TextChatHolder(textView);
 
         }
@@ -63,14 +57,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ChatMessages message=messages.get(position);
-        switch (holder.getItemViewType()){
+        Messages message = messages.get(position);
+        switch (holder.getItemViewType()) {
             case TEXT:
-                ChatLayoutDataBindHelper.configureTextViewHolder(mContext,(TextChatHolder) holder,message);
+                ChatLayoutDataBindHelper.configureTextViewHolder(mContext, (TextChatHolder) holder, message);
                 break;
 
             case PHOTO:
-                ChatLayoutDataBindHelper.configureImageAttachment(mContext, (PhotoChatHolder) holder,message);
+                ChatLayoutDataBindHelper.configureImageAttachment(mContext, (PhotoChatHolder) holder, message);
+                break;
+
+            case LOCATION:
+                ChatLayoutDataBindHelper.configureLocation(mContext,(LocationChatHolder) holder,message);
                 break;
         }
     }
@@ -83,81 +81,49 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public int getItemViewType(int position) {
 
-        if(messages.get(position).getLocationAttachment()!=null){
-            return LOCATION;
-        }else if(messages.get(position).getAttachments()!=null && messages.get(position).getAttachments().size()>0){
-            return PHOTO;
-        } else if(!TextUtils.isEmpty(messages.get(position).getMsg())){
-            return TEXT;
-        }else{
-            return TEXT;
-        }
+        switch (messages.get(position).getMessageType()) {
+            case IMAGE:
+                return PHOTO;
 
-       /* if(messages.get(position).getAttachments()!=null && messages.get(position).getAttachments().size()>0){
-            return PHOTO;
-        }else if(messages.get(position).getLocationAttachment()!=null){
-            return LOCATION;
-        } else if(!TextUtils.isEmpty(messages.get(position).getMsg())){
-            return TEXT;
-        }else{
-            return TEXT;
-        }*/
+            case LOCATION:
+                return LOCATION;
+
+            case TEXT:
+            default:
+                return TEXT;
+        }
     }
 
-    public static class TextChatHolder extends RecyclerView.ViewHolder{
-        public TextView lblText,lblTime;
+    public static class TextChatHolder extends RecyclerView.ViewHolder {
+        public TextView lblText, lblTime;
+
         public TextChatHolder(View itemView) {
             super(itemView);
-            lblText= (TextView) itemView.findViewById(R.id.lblText);
-            lblTime= (TextView) itemView.findViewById(R.id.lblTime);
+            lblText = (TextView) itemView.findViewById(R.id.lblText);
+            lblTime = (TextView) itemView.findViewById(R.id.lblTime);
         }
     }
 
-    public static class PhotoChatHolder extends RecyclerView.ViewHolder{
+    public static class PhotoChatHolder extends RecyclerView.ViewHolder {
         public TextView lblTime;
         public ImageView imgAttachment;
+
         public PhotoChatHolder(View itemView) {
             super(itemView);
-            imgAttachment= (ImageView) itemView.findViewById(R.id.img_attachment);
-            lblTime= (TextView) itemView.findViewById(R.id.lblTime);
+            imgAttachment = (ImageView) itemView.findViewById(R.id.img_attachment);
+            lblTime = (TextView) itemView.findViewById(R.id.lblTime);
         }
     }
 
-    public static class LocationChatHolder extends RecyclerView.ViewHolder{
+    public static class LocationChatHolder extends RecyclerView.ViewHolder {
         ImageView imgLocationAttachment;
-        TextView lblLocationName,lblLocationDesc;
+        TextView lblLocationName, lblLocationDesc;
+
         public LocationChatHolder(View itemView) {
             super(itemView);
-            imgLocationAttachment= (ImageView) itemView.findViewById(R.id.img_location);
-            lblLocationName= (TextView) itemView.findViewById(R.id.lblLocationName);
-            lblLocationDesc= (TextView) itemView.findViewById(R.id.lblLocationDesc);
+            imgLocationAttachment = (ImageView) itemView.findViewById(R.id.img_location);
+            lblLocationName = (TextView) itemView.findViewById(R.id.lblLocationName);
+            lblLocationDesc = (TextView) itemView.findViewById(R.id.lblLocationDesc);
         }
     }
-
-    /*public static class SentBindingHolder extends RecyclerView.ViewHolder{
-        private SentMessageBinding binding;
-        public SentBindingHolder(View itemView) {
-            super(itemView);
-            binding= DataBindingUtil.bind(itemView);
-        }
-
-        public SentMessageBinding getBinding(){
-            return binding;
-        }
-    }
-
-    public static class ReceivedBindingHolder extends RecyclerView.ViewHolder {
-        private ReceivedMessageBinding binding;
-        public ReceivedBindingHolder(View itemView) {
-            super(itemView);
-            binding=DataBindingUtil.bind(itemView);
-        }
-
-        public ReceivedMessageBinding getBinding(){
-            return binding;
-        }
-    }*/
-
-
-
 }

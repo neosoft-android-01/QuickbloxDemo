@@ -7,7 +7,6 @@ package com.webwerks.qbcore.utils;
 public class Constant {
 
     public static String CHAT_SHARE_LOCATION_MSG_BODY = "Location";
-   // public static String QB_COSTOM_PARAM_IS_LOCATION_ATTACHED = "isLocationAttached";
     public static String QB_COSTOM_PARAM_LOCATION_LAT = "lat";
     public static String QB_COSTOM_PARAM_LOCATION_LNG = "long";
     public static String QB_COSTOM_PARAM_LOCATION_NAME = "name";

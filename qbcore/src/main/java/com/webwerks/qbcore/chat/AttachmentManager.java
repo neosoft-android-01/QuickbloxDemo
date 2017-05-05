@@ -1,6 +1,9 @@
 package com.webwerks.qbcore.chat;
 
+import android.util.Log;
+
 import com.quickblox.content.QBContent;
+import com.quickblox.content.model.QBFile;
 import com.quickblox.core.QBProgressCallback;
 import com.quickblox.core.io.IOUtils;
 
@@ -11,6 +14,9 @@ import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -54,4 +60,31 @@ public class AttachmentManager {
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
         }
     }
+
+    public static synchronized Observable<QBFile> uploadMediaAttachment(final File path, final Observer<Integer> progressUpdate){
+
+        return Observable.fromCallable(new Callable<QBFile>(){
+            @Override
+            public QBFile call() throws Exception {
+                return QBContent.uploadFileTask(path, false, "", new QBProgressCallback() {
+                    @Override
+                    public void onProgressUpdate(final int i) {
+                        Observable.create(new ObservableOnSubscribe<Integer>() {
+
+                            @Override
+                            public void subscribe(ObservableEmitter<Integer> e) throws Exception {
+                                e.onNext(i);
+
+                            }
+                        }).subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(progressUpdate);
+
+                        Log.e("Progress",":::" + i);
+                    }
+                }).perform();
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io());
+    }
+
 }

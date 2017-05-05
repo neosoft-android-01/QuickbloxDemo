@@ -15,7 +15,7 @@ import io.realm.RealmList;
  * Created by webwerks on 25/4/17.
  */
 
-public class ChatMessages {
+public class Messages {
 
     private String id;
     private String chatDialogId;
@@ -30,6 +30,15 @@ public class ChatMessages {
     private RealmList<RealmInteger> readIds;
     private RealmList<RealmAttachment> attachments;
     private LocationAttachment locationAttachment;
+    private MessageType messageType;
+
+    public MessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
+    }
 
     public LocationAttachment getLocationAttachment() {
         return locationAttachment;
@@ -151,7 +160,7 @@ public class ChatMessages {
         this.attachments = attachmentList;
     }
 
-    public static QBChatMessage getQBChatMessage(ChatMessages messages){
+    public static QBChatMessage getQBChatMessage(Messages messages){
         QBChatMessage qbChatMessage=new QBChatMessage();
         qbChatMessage.setId(messages.getId());
         qbChatMessage.setDialogId(messages.getChatDialogId());
@@ -165,8 +174,8 @@ public class ChatMessages {
         return qbChatMessage;
     }
 
-    public static ChatMessages getChatMessage(QBChatMessage qbChatMessage){
-        ChatMessages chatMessages=new ChatMessages();
+    public static Messages getChatMessage(QBChatMessage qbChatMessage){
+        Messages chatMessages=new Messages();
         chatMessages.setId(qbChatMessage.getId());
         chatMessages.setChatDialogId(qbChatMessage.getDialogId());
         chatMessages.setDateSent(qbChatMessage.getDateSent());
@@ -187,10 +196,23 @@ public class ChatMessages {
             locationAttachment.setLocationDesc(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC).toString());
             locationAttachment.setLatitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT).toString()));
             locationAttachment.setLongitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG).toString()));
+            chatMessages.setLocationAttachment(locationAttachment);
+        }
+
+        if(chatMessages.getLocationAttachment()!=null){
+            chatMessages.setMessageType(MessageType.LOCATION);
+        }else if(chatMessages.getAttachments()!=null && chatMessages.getAttachments().size()>0){
+
+            if(chatMessages.getAttachments().get(0).getType().equalsIgnoreCase("photo")){
+                chatMessages.setMessageType(MessageType.IMAGE);
+            }else{
+                chatMessages.setMessageType(MessageType.VIDEO);
+            }
+
+        }else{
+            chatMessages.setMessageType(MessageType.TEXT);
         }
 
         return chatMessages;
     }
-
-
 }
