@@ -29,7 +29,7 @@ import java.util.List;
 public class NearByPlacesTask extends AsyncTask<Object,Integer,String> {
 
     //private static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
-    private static final String GOOGLE_SERVER_API_KEY="AIzaSyAwORYJjl7trw4FOXXDTdbbIryXbBZO9CE";
+    public static final String GOOGLE_SERVER_API_KEY="AIzaSyAwORYJjl7trw4FOXXDTdbbIryXbBZO9CE";
     private int PROXIMITY_RADIUS = 200;
 
     String googlePlacesData = null;

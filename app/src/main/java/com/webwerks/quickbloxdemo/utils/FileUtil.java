@@ -1,12 +1,9 @@
 package com.webwerks.quickbloxdemo.utils;
 
-import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -16,29 +13,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.quickblox.core.io.IOUtils;
 import com.webwerks.qbcore.chat.AttachmentManager;
-import com.webwerks.qbcore.chat.OnAttachmentDownload;
+import com.webwerks.qbcore.models.MessageType;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by webwerks on 27/4/17.
@@ -67,14 +50,59 @@ public class FileUtil {
         return imageFile;
     }
 
-    public static Observable<String> getImageAttachmentPath(int fileId){
+    public static File getAudioFile() {
+        //File folder = null;
+        File file = null;
+        try {
+            File folderAudio = new File(Environment.getExternalStorageDirectory() + "/Chat/audio");
+            boolean successAudio = true;
+            if (!folderAudio.exists()) {
+                successAudio = folderAudio.mkdirs();
+            }
 
+            if (successAudio) {
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                file = new File(folderAudio.getPath() + File.separator + "AUD_" + timeStamp + ".mp3");
+                if (file.createNewFile()) {
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    public static File getAudioFile(int fileId){
+        File folderAudio = new File(Environment.getExternalStorageDirectory() + "/Chat/audio");
+        boolean successAudio = true;
+        if (!folderAudio.exists()) {
+            successAudio = folderAudio.mkdirs();
+        }
+        return new File(folderAudio.getPath()+File.separator+"AUD_"+fileId+".mp3");
+    }
+
+    public static File getImageFile(int fileId){
         File folder = new File(Environment.getExternalStorageDirectory() + "/Chat/image");
         boolean success = true;
         if (!folder.exists()) {
             success = folder.mkdirs();
         }
-        File file = new File(folder.getPath() + File.separator + "IMG_" + fileId + ".png");
+        return new File(folder.getPath() + File.separator + "IMG_" + fileId + ".png");
+    }
+
+    public static Observable<String> getAttachmentPath(int fileId, MessageType type){
+        File file=null;
+        switch (type){
+            case IMAGE:
+                file=getImageFile(fileId);
+                break;
+
+            case AUDIO:
+                file=getAudioFile(fileId);
+                break;
+        }
+
+
         return AttachmentManager.processReceivedAttachment(fileId,file);
 
         /*return Observable.fromCallable(new Callable<String>() {
@@ -205,6 +233,15 @@ public class FileUtil {
                     mediaData.setType(getMimeType(context, contentUri));
                     return mediaData;
                 }
+            }else if ("content".equalsIgnoreCase(uri.getScheme())) {
+                mediaData.setPath(getDataColumn(context, uri, null, null, mediaData));
+                mediaData.setType(getMimeType(context, uri));
+
+                return mediaData;
+            }else if ("file".equalsIgnoreCase(uri.getScheme())) {
+                mediaData.setPath(uri.getPath());
+                mediaData.setType(getMimeType(context, uri));
+                return mediaData;
             }
         }
         // MediaStore (and general)

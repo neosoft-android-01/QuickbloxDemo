@@ -35,17 +35,21 @@ public class AttachmentManager {
                 public String call() throws Exception {
                     return path.getPath();
                 }
-            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+            }).subscribeOn(AndroidSchedulers.mainThread()).observeOn(AndroidSchedulers.mainThread());
         }else{
             return Observable.fromCallable(new Callable<InputStream>() {
                 @Override
                 public InputStream call() throws Exception {
-                    return QBContent.downloadFileById(fileId, new QBProgressCallback() {
-                        @Override
-                        public void onProgressUpdate(int i) {
+                    try {
+                        return QBContent.downloadFileById(fileId, new QBProgressCallback() {
+                            @Override
+                            public void onProgressUpdate(int i) {
 
-                        }
-                    }).perform();
+                            }
+                        }).perform();
+                    }catch (Exception e){
+                        throw new Exception(e.getMessage());
+                    }
                 }
             }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).map(new Function<InputStream, String >() {
                 @Override
@@ -66,24 +70,26 @@ public class AttachmentManager {
         return Observable.fromCallable(new Callable<QBFile>(){
             @Override
             public QBFile call() throws Exception {
-                return QBContent.uploadFileTask(path, false, "", new QBProgressCallback() {
-                    @Override
-                    public void onProgressUpdate(final int i) {
-                        Observable.create(new ObservableOnSubscribe<Integer>() {
-
+                try {
+                    QBFile qbFile= QBContent.uploadFileTask(path, false, "", new QBProgressCallback() {
+                        @Override
+                        public void onProgressUpdate(final int i) {
+                       /* Observable.create(new ObservableOnSubscribe<Integer>() {
                             @Override
                             public void subscribe(ObservableEmitter<Integer> e) throws Exception {
                                 e.onNext(i);
                             }
                         }).subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(progressUpdate);
-
-                        Log.e("Progress",":::" + i);
-                    }
-                }).perform();
+                                .subscribe(progressUpdate);*/
+                            Log.e("Progress", ":::" + i);
+                        }
+                    }).perform();
+                    return qbFile;
+                }catch (Exception e){
+                    throw new Exception(e.getMessage());
+                }
             }
         }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io());
     }
-
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.util.DisplayMetrics;
 import android.view.Window;
 
 import com.webwerks.qbcore.auth.QBInitialization;
@@ -60,5 +61,14 @@ public class App extends Application {
         if (alertDialog != null) {
             alertDialog.dismiss();
         }
+    }
+
+    private DisplayMetrics disMat;
+
+    public DisplayMetrics getDisplayMatrix(){
+        if(disMat==null)
+            disMat = getAppInstance().getResources().getDisplayMetrics();
+
+        return disMat;
     }
 }

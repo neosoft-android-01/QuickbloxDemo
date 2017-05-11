@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by webwerks on 27/4/17.
@@ -13,6 +14,12 @@ import java.util.Date;
 
 public class DateUtils {
 
+
+    public static String getDurationFromMilliseconds(int milliseconds){
+        return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes((long) milliseconds),
+                TimeUnit.MILLISECONDS.toSeconds((long) milliseconds) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) milliseconds)));
+    }
 
     public static String getTimeText( long dateTime, String formatFor ) {
 
@@ -63,7 +70,7 @@ public class DateUtils {
         }
     }
 
-    public static Date getZeroTimeDate( Date fecha ) {
+    private static Date getZeroTimeDate( Date fecha ) {
         Date     res      = fecha;
         Calendar calendar = Calendar.getInstance();
 

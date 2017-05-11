@@ -32,6 +32,35 @@ public class Messages {
     private LocationAttachment locationAttachment;
     private MessageType messageType;
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public int getCurrentDuration() {
+        return currentDuration;
+    }
+
+    public void setCurrentDuration(int currentDuration) {
+        this.currentDuration = currentDuration;
+    }
+
+    private int totalDuration;
+    private String state;
+    private int currentDuration;
+
+    public int getTotalDuration() {
+        return totalDuration;
+    }
+
+    public void setTotalDuration(int totalDuration) {
+        this.totalDuration = totalDuration;
+    }
+
+
     public MessageType getMessageType() {
         return messageType;
     }
@@ -189,13 +218,14 @@ public class Messages {
         if(qbChatMessage.getAttachments()!=null)
             chatMessages.setAttachments((List<QBAttachment>) qbChatMessage.getAttachments());
 
-        if( (qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME) != null) ){
+        if( (qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_NAME) != null) ){
 
             LocationAttachment locationAttachment=new LocationAttachment();
-            locationAttachment.setLocationName(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME).toString());
-            locationAttachment.setLocationDesc(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC).toString());
-            locationAttachment.setLatitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT).toString()));
-            locationAttachment.setLongitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG).toString()));
+            locationAttachment.setLocationName(qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_NAME).toString());
+            locationAttachment.setLocationDesc(qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_DESC).toString());
+            locationAttachment.setLatitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_LAT).toString()));
+            locationAttachment.setLongitude(Double.parseDouble(qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_LNG).toString()));
+            locationAttachment.setUrl(qbChatMessage.getProperty(Constant.QB_CUSTOM_LOCATION_MAP_IMG).toString());
             chatMessages.setLocationAttachment(locationAttachment);
         }
 
@@ -203,9 +233,12 @@ public class Messages {
             chatMessages.setMessageType(MessageType.LOCATION);
         }else if(chatMessages.getAttachments()!=null && chatMessages.getAttachments().size()>0){
 
-            if(chatMessages.getAttachments().get(0).getType().equalsIgnoreCase("photo")){
+            if(chatMessages.getAttachments().get(0).getType().equalsIgnoreCase(QBAttachment.IMAGE_TYPE) ||
+                    chatMessages.getAttachments().get(0).getType().equalsIgnoreCase(QBAttachment.PHOTO_TYPE) ){
                 chatMessages.setMessageType(MessageType.IMAGE);
-            }else{
+            }else if(chatMessages.getAttachments().get(0).getType().equalsIgnoreCase(QBAttachment.AUDIO_TYPE)){
+                chatMessages.setMessageType(MessageType.AUDIO);
+            }else if(chatMessages.getAttachments().get(0).getType().equalsIgnoreCase(QBAttachment.VIDEO_TYPE)){
                 chatMessages.setMessageType(MessageType.VIDEO);
             }
 

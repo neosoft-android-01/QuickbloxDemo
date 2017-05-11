@@ -6,4 +6,7 @@
     </string-array>
 
     <string name="google_maps_key">AIzaSyCnuUVh6oVY9j_C7YiE_nsva0LZgDzJVEM</string>
+
+    <item type="id" name="audio_state" />
+    <item type="id" name="audio_data" />
 </resources>

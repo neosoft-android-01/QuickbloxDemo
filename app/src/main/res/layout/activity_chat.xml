@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.webwerks.quickbloxdemo.chat.ChatViewModel"/>
+            type="com.webwerks.quickbloxdemo.chat.ChatViewModel" />
 
     </data>
 
@@ -16,60 +16,152 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include layout="@layout/toolbar"/>
+        <include layout="@layout/toolbar" />
 
         <RelativeLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#6438B0">
+            android:background="#6438B0"
+            android:orientation="vertical">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/lst_chat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:divider="@null"
-                android:padding="5dp"
                 android:layout_above="@+id/ll_send"
-                android:stackFromBottom="true"
+                android:divider="@null"
                 android:dividerHeight="5dp"
-                bind:layoutManager="android.support.v7.widget.LinearLayoutManager"/>
+                android:padding="5dp"
+                android:stackFromBottom="true"
+                bind:layoutManager="android.support.v7.widget.LinearLayoutManager" />
 
             <LinearLayout
                 android:id="@+id/ll_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_alignParentBottom="true"
-                android:background="#677DC7">
+                android:background="#677DC7"
+                android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/btn_attachment"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:src="@drawable/ic_attachment"
-                    android:background="@null"
-                    android:scaleType="fitXY"
-                    android:layout_gravity="center"
-                    android:padding="10dp"
-                    android:onClick="@{() -> viewModel.onAttachmentClick()}"/>
-
-                <EditText
-                    android:id="@+id/edt_msg"
+                <LinearLayout
+                    android:id="@+id/ll_text_panel"
                     android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:padding="10dp"
-                    android:textColor="@android:color/white"
-                    android:background="@null"/>
+                    android:orientation="horizontal"
+                    android:visibility="visible">
+
+                    <ImageButton
+                        android:id="@+id/btn_attachment"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:background="@null"
+                        android:onClick="@{() -> viewModel.onAttachmentClick()}"
+                        android:padding="10dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/ic_attachment" />
+
+                    <EditText
+                        android:id="@+id/edt_msg"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="Your message..."
+                        android:onTextChanged="@{viewModel.onTextChanged}"
+                        android:padding="10dp"
+                        android:textColor="@android:color/white" />
+
+                </LinearLayout>
+
+                <com.webwerks.quickbloxdemo.ui.views.SlideToCancel.FrameLayoutFixed
+                    android:id="@+id/fl_audio_panel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:id="@+id/slideText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="30dp"
+                        android:orientation="horizontal">
+
+                        <!-- <TextView
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:layout_gravity="center_vertical"
+                             android:layout_marginTop="1dp"
+                             android:drawableLeft="@drawable/ic_prev"
+                             android:text="Slide To cancel"
+                             android:textColor="@android:color/white"
+                             android:gravity="center_vertical"
+                             />
+-->
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop="1dp"
+                            android:src="@drawable/ic_prev" />
+
+                        <TextView
+                            android:id="@+id/slideToCancelTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="6dp"
+                            android:text="Slide To cancel"
+                            android:textColor="@android:color/white"
+                            android:textSize="12dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="13dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop="1dp"
+                            android:src="@drawable/rec" />
+
+                        <TextView
+                            android:id="@+id/recording_time_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="6dp"
+                            android:text="00:00"
+                            android:textColor="#ffffff"
+                            android:textSize="16dp" />
+                    </LinearLayout>
+                </com.webwerks.quickbloxdemo.ui.views.SlideToCancel.FrameLayoutFixed>
 
                 <Button
                     android:id="@+id/btn_send"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:background="@android:drawable/ic_menu_send"
                     android:layout_gravity="center"
-                    android:onClick="@{() -> viewModel.onSendMsgClick(edtMsg)}" />
+                    android:background="@android:drawable/ic_menu_send"
+                    android:onClick="@{() -> viewModel.onSendMsgClick(edtMsg)}"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_audio_record"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/mic_button_states"
+                    android:onTouch="@{viewModel.onTouch}" />
 
             </LinearLayout>
 

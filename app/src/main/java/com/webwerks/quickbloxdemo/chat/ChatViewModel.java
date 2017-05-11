@@ -8,23 +8,30 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.attachment.AttachmentDialog;
+import com.webwerks.quickbloxdemo.chat.audio.AudioRecodeManager;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
 import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
+import com.webwerks.quickbloxdemo.ui.views.SlideToCancel.ViewProxy;
 import com.webwerks.quickbloxdemo.utils.FileUtil;
 import com.webwerks.quickbloxdemo.utils.PermissionManager;
-
 import java.io.File;
 
 import io.reactivex.Observer;
@@ -38,38 +45,21 @@ import io.reactivex.functions.Consumer;
 
 public class ChatViewModel {
 
-   // private ChatBinding chatBinding;
+    private ChatBinding chatBinding;
     private Activity mContext;
     private ChatDialog chatDialog;
     private static File imageFile;
+    File audioFile=null;
 
     public ChatViewModel(Activity context, ChatBinding binding, ChatDialog dialog){
-      //  chatBinding=binding;
+        chatBinding=binding;
         mContext=context;
         chatDialog=dialog;
     }
 
     public void onSendMsgClick(final EditText msg){
         if(!TextUtils.isEmpty(msg.getText())) {
-            Observer progressObserver = new Observer<Integer>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-                }
-
-                @Override
-                public void onNext(Integer value) {
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                }
-
-                @Override
-                public void onComplete() {
-                }
-            };
-
-            SendMessageRequest sendRequest=new SendMessageRequest.Builder(chatDialog,progressObserver)
+            SendMessageRequest sendRequest=new SendMessageRequest.Builder(chatDialog,null)
                     .message(msg.getText().toString())
                     .messageType(MessageType.TEXT).build();
             sendRequest.send().subscribe(new Consumer<Messages>() {
@@ -79,22 +69,141 @@ public class ChatViewModel {
                     msg.setText("");
                 }
             });
-
-            /*ChatManager.getInstance().sendMessage(chatDialog, msg.getText().toString(),null,
-                    null,ChatManager.AttachmentType.TEXT).subscribe(new Consumer() {
-                @Override
-                public void accept(Object o) throws Exception {
-                    Messages chatMessages = (Messages) o;
-                    ((ChatActivity) mContext).showMessages(chatMessages);
-                    msg.setText("");
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable throwable) throws Exception {
-
-                }
-            });*/
         }
+    }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        if(TextUtils.isEmpty(s)){
+            chatBinding.btnSend.setVisibility(View.GONE);
+            chatBinding.btnAudioRecord.setVisibility(View.VISIBLE);
+        }else {
+            chatBinding.btnSend.setVisibility(View.VISIBLE);
+            chatBinding.btnAudioRecord.setVisibility(View.GONE);
+        }
+    }
+
+    public static int dp(double value) {
+        return (int) Math.ceil(1 * value);
+    }
+
+    private float startedDraggingX = -1;
+    private float distCanMove = dp(dp(App.getAppInstance().getDisplayMatrix().widthPixels)*(0.50));
+
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        if (PermissionManager.askForPermission(2, mContext, Manifest.permission.RECORD_AUDIO, "")){
+
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) chatBinding.slideText.getLayoutParams();
+                params.leftMargin = dp(30);
+                chatBinding.slideText.setLayoutParams(params);
+                ViewProxy.setAlpha(chatBinding.slideText, 1);
+                startedDraggingX = -1;
+
+                startRecode();
+
+                chatBinding.btnAudioRecord.getParent()
+                        .requestDisallowInterceptTouchEvent(true);
+                chatBinding.flAudioPanel.setVisibility(View.VISIBLE);
+                chatBinding.llTextPanel.setVisibility(View.GONE);
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP
+                    || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+                startedDraggingX = -1;
+
+                stopRecode();
+
+                chatBinding.llTextPanel.setVisibility(View.VISIBLE);
+                chatBinding.flAudioPanel.setVisibility(View.GONE);
+            } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                float x = motionEvent.getX();
+
+                if (x < -distCanMove) {
+
+                    cancelAudioSending();
+
+                    chatBinding.llTextPanel.setVisibility(View.VISIBLE);
+                    chatBinding.flAudioPanel.setVisibility(View.GONE);
+                }
+                x = x + ViewProxy.getX(chatBinding.btnAudioRecord);
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) chatBinding.slideText.getLayoutParams();
+                if (startedDraggingX != -1) {
+                    float dist = (x - startedDraggingX);
+                    params.leftMargin = dp(30) + (int) dist;
+                    chatBinding.slideText.setLayoutParams(params);
+                    float alpha = 1.0f + dist / distCanMove;
+                    if (alpha > 1) {
+                        alpha = 1;
+                    } else if (alpha < 0) {
+                        alpha = 0;
+                    }
+                    ViewProxy.setAlpha(chatBinding.slideText, alpha);
+                }
+                if (x <= ViewProxy.getX(chatBinding.slideText) + chatBinding.slideText.getWidth() + dp(30)) {
+                    if (startedDraggingX == -1) {
+                        startedDraggingX = x;
+                        distCanMove = (chatBinding.flAudioPanel.getMeasuredWidth()
+                                - chatBinding.slideText.getMeasuredWidth() - dp(48)) / 2.0f;
+                        if (distCanMove <= 0) {
+                            distCanMove = dp(80);
+                        } else if (distCanMove > dp(80)) {
+                            distCanMove = dp(80);
+                        }
+                    }
+                }
+                if (params.leftMargin > dp(30)) {
+                    params.leftMargin = dp(30);
+                    chatBinding.slideText.setLayoutParams(params);
+                    ViewProxy.setAlpha(chatBinding.slideText, 1);
+                    startedDraggingX = -1;
+                }
+            }
+            view.onTouchEvent(motionEvent);
+        }
+        return true;
+    }
+
+    Observer audioObserver;
+
+    public void startRecode(){
+
+        audioObserver=new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onNext(String value) {
+                chatBinding.recordingTimeText.setText(value);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onComplete() {
+                chatBinding.recordingTimeText.setText("00:00");
+            }
+        };
+
+        audioFile=FileUtil.getAudioFile();
+        AudioRecodeManager.getInstance().startRecode(audioFile,audioObserver);
+    }
+
+    public void stopRecode(){
+        if(audioFile.exists()) {
+            AudioRecodeManager.getInstance().stopRecode();
+            if (chatBinding.recordingTimeText.getText().equals("00:00"))
+                audioFile.delete();
+            else
+                ((ChatActivity) mContext).sendAttachment(audioFile, MessageType.AUDIO);
+            audioObserver.onComplete();
+        }
+    }
+
+    public void cancelAudioSending(){
+        AudioRecodeManager.getInstance().stopRecode();
+        audioFile.delete();
     }
 
     public void onAttachmentClick(){
@@ -127,7 +236,6 @@ public class ChatViewModel {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
-                //mContext.startActivity(new Intent(mContext, SendLocationActivity.class));
             }
 
             @Override
@@ -139,13 +247,6 @@ public class ChatViewModel {
     }
 
     private void openAudioGallery(Activity activity){
-        /*Intent intent = new Intent();
-        intent.setType("audio*//*");
-        String[] mimetypes = {"audio/3gp", "audio/AMR", "audio/mp3"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        activity.startActivityForResult(Intent.createChooser(intent, "Select Audio"), Constants.GALLERY_AUDIO);*/
-
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         activity.startActivityForResult(intent,Constants.GALLERY_AUDIO);
     }

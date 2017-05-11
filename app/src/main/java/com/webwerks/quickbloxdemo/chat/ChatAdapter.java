@@ -5,10 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.webwerks.qbcore.models.Messages;
@@ -22,7 +24,7 @@ import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final int TEXT = 0, PHOTO = 1, LOCATION = 2;
+    private final int TEXT = 0, PHOTO = 1, LOCATION = 2,AUDIO=3;
     List<Messages> messages;
     Context mContext;
 
@@ -41,12 +43,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         switch (viewType) {
             case PHOTO:
-                View photoView = layoutInflater.inflate(R.layout.item_photo_msg, null);
-                return new PhotoChatHolder(photoView);
+                View photoView = layoutInflater.inflate(R.layout.item_image_attachment, null);
+                return new ImageAttachmentHolder(photoView);
 
             case LOCATION:
-                View locationView = layoutInflater.inflate(R.layout.item_location_msg, null);
-                return new LocationChatHolder(locationView);
+                View locationView = layoutInflater.inflate(R.layout.item_location_attachment, null);
+                return new LocationAttachmentHolder(locationView);
+
+            case AUDIO:
+                View audioView=layoutInflater.inflate(R.layout.item_audio_attachment,null);
+                return new AudioAttachmentHolder(audioView);
 
             case TEXT:
             default:
@@ -58,18 +64,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Messages message = messages.get(position);
+        Messages message = (Messages) messages.get(position);
         switch (holder.getItemViewType()) {
             case TEXT:
-                ChatLayoutDataBindHelper.configureTextViewHolder(mContext, (TextChatHolder) holder, message);
+                ChatLayoutDataBindHelper.configureTextChatHolder(mContext, (TextChatHolder) holder, message);
                 break;
 
             case PHOTO:
-                ChatLayoutDataBindHelper.configureImageAttachment(mContext, (PhotoChatHolder) holder, message);
+                ChatLayoutDataBindHelper.configureImageAttachment(mContext, (ImageAttachmentHolder) holder, message);
                 break;
 
             case LOCATION:
-                ChatLayoutDataBindHelper.configureLocation(mContext,(LocationChatHolder) holder,message);
+                ChatLayoutDataBindHelper.configureLocation(mContext,(LocationAttachmentHolder) holder,message);
+                break;
+
+            case AUDIO:
+                ChatLayoutDataBindHelper.configureAudioAttachment(this,mContext,(AudioAttachmentHolder) holder,message);
                 break;
         }
     }
@@ -89,6 +99,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case LOCATION:
                 return LOCATION;
 
+            case AUDIO:
+                return AUDIO;
+
             case TEXT:
             default:
                 return TEXT;
@@ -105,13 +118,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public static class PhotoChatHolder extends RecyclerView.ViewHolder {
+    public static class ImageAttachmentHolder extends RecyclerView.ViewHolder {
         public TextView lblTime;
         public ImageView imgAttachment;
         public ProgressBar progressBar;
         public RelativeLayout rlImageView;
 
-        public PhotoChatHolder(View itemView) {
+        public ImageAttachmentHolder(View itemView) {
             super(itemView);
             imgAttachment = (ImageView) itemView.findViewById(R.id.img_attachment);
             lblTime = (TextView) itemView.findViewById(R.id.lblTime);
@@ -120,13 +133,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public static class LocationChatHolder extends RecyclerView.ViewHolder {
+    public static class LocationAttachmentHolder extends RecyclerView.ViewHolder {
         ImageView imgLocationAttachment;
         TextView lblLocationName, lblLocationDesc,lblTime;
         RelativeLayout rlRoot;
         LinearLayout llInfo;
 
-        public LocationChatHolder(View itemView) {
+        public LocationAttachmentHolder(View itemView) {
             super(itemView);
             rlRoot= (RelativeLayout) itemView.findViewById(R.id.rl_location_message);
             llInfo= (LinearLayout) itemView.findViewById(R.id.ll_info);
@@ -134,6 +147,23 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             lblLocationName = (TextView) itemView.findViewById(R.id.lblLocationName);
             lblLocationDesc = (TextView) itemView.findViewById(R.id.lblLocationDesc);
             lblTime = (TextView) itemView.findViewById(R.id.lblTime);
+        }
+    }
+
+    public static class AudioAttachmentHolder extends RecyclerView.ViewHolder{
+        RelativeLayout llRoot;
+        TextView lblTime,lblCurrent,lblTotalDuration;
+        ImageButton btnDownload;
+        SeekBar audioProgress;
+
+        public AudioAttachmentHolder(View itemView) {
+            super(itemView);
+            llRoot= (RelativeLayout) itemView.findViewById(R.id.ll_root);
+            lblTime = (TextView) itemView.findViewById(R.id.lblTime);
+            btnDownload= (ImageButton) itemView.findViewById(R.id.btnDownload);
+            audioProgress= (SeekBar) itemView.findViewById(R.id.sb_audio_progress);
+            lblCurrent= (TextView) itemView.findViewById(R.id.lblCurrent);
+            lblTotalDuration= (TextView) itemView.findViewById(R.id.lblTotalDuration);
         }
     }
 }

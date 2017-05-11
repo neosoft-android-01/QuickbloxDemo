@@ -1,5 +1,7 @@
 package com.webwerks.qbcore.chat;
 
+import android.os.Environment;
+
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatDialog;
@@ -12,6 +14,7 @@ import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.utils.Constant;
 
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -100,6 +103,12 @@ public class SendMessageRequest {
                         switch (type){
                             case IMAGE:
                             case LOCATION:
+                                if(mediaAttachment.get(0).getPath().contains("Chat")) {
+                                    File imageFile = new File(Environment.getExternalStorageDirectory().getPath()
+                                            + "/Chat/image" +  File.separator + "IMG_" + qbFile.getId()  + ".png");
+                                    boolean success = mediaAttachment.get(0).renameTo(imageFile);
+                                    mediaAttachment.get(0).delete();
+                                }
                                 attachmentType=QBAttachment.IMAGE_TYPE;
                                 break;
 
@@ -108,6 +117,12 @@ public class SendMessageRequest {
                                 break;
 
                             case AUDIO:
+                                if(mediaAttachment.get(0).getPath().contains("Chat")) {
+                                    File audioFile = new File(Environment.getExternalStorageDirectory().getPath()
+                                            + "/Chat/audio" + File.separator + "AUD_" + qbFile.getId() + ".mp3");
+                                    boolean success = mediaAttachment.get(0).renameTo(audioFile);
+                                    mediaAttachment.get(0).delete();
+                                }
                                 attachmentType=QBAttachment.AUDIO_TYPE;
                                 break;
                         }
@@ -150,10 +165,11 @@ public class SendMessageRequest {
 
                     if(type== MessageType.LOCATION) {
                         chatMessage.setBody(Constant.CHAT_SHARE_LOCATION_MSG_BODY);
-                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_LAT, String.valueOf(locationAttachment.getLatitude()));
-                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_LNG, String.valueOf(locationAttachment.getLongitude()));
-                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_NAME, locationAttachment.getLocationName());
-                        chatMessage.setProperty(Constant.QB_COSTOM_PARAM_LOCATION_DESC, locationAttachment.getLocationDesc());
+                        chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_LAT, String.valueOf(locationAttachment.getLatitude()));
+                        chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_LNG, String.valueOf(locationAttachment.getLongitude()));
+                        chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_NAME, locationAttachment.getLocationName());
+                        chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_DESC, locationAttachment.getLocationDesc());
+                        chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_MAP_IMG,locationAttachment.getUrl());
                     }
                     chatMessage.setSaveToHistory(true); // Save a message to history
                     chatMessage.setDateSent(System.currentTimeMillis() / 1000);

@@ -18,6 +18,7 @@ public class RealmAttachment extends RealmObject {
     private String url;
     private String contentType;
 
+
     public static RealmAttachment getRealmAttachment(QBAttachment qbAttachment){
         RealmAttachment realmAttachment=new RealmAttachment();
         qbAttachment.getContentType();

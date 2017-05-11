@@ -16,6 +16,7 @@ import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
 import com.webwerks.quickbloxdemo.R;
+import com.webwerks.quickbloxdemo.chat.audio.AudioPlayerManager;
 import com.webwerks.quickbloxdemo.chat.location.UploadLocation;
 import com.webwerks.quickbloxdemo.databinding.ChatBinding;
 import com.webwerks.quickbloxdemo.global.App;
@@ -25,13 +26,8 @@ import com.webwerks.quickbloxdemo.utils.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -113,7 +109,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
             switch (requestCode) {
                 case Constants.CAMERA_IMAGE:
                     imagePath = ChatViewModel.getImageFile();
-                    sendImage(imagePath);
+                    sendAttachment(imagePath,MessageType.IMAGE);
                     break;
 
                 case Constants.GALLERY_IMAGE:
@@ -124,7 +120,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                                 && !TextUtils.isEmpty(mediaData.getPath())) {
                             if (mediaData.getType().contains("image")) {
                                 imagePath = new File(mediaData.getPath());
-                                sendImage(imagePath);
+                                sendAttachment(imagePath,MessageType.IMAGE);
                             }
                         }
                     }
@@ -138,55 +134,21 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                 case Constants.GALLERY_AUDIO:
                     FileUtil.MediaData mediaData = FileUtil.getPath(this, data.getData());
                     if (mediaData != null) {
-                       Log.e("PATH",mediaData.getPath() + "::::");
+                        Log.e("PATH", mediaData.getPath() + "::::");
+                        sendAttachment(new File(mediaData.getPath()),MessageType.AUDIO);
                     }
                     break;
             }
         }
     }
 
-    public void sendImage(File imagePath) {
-        if (imagePath != null) {
+    public void sendAttachment(File filePath,MessageType type) {
+        if (filePath != null) {
             App.getAppInstance().showLoading(this);
-            /*ChatManager.getInstance().sendMessage(currentDialog, "", imagePath, null,ChatManager.AttachmentType.IMAGE).subscribe(new Consumer() {
-                @Override
-                public void accept(Object o) throws Exception {
-                    Messages chatMessages = (Messages) o;
-                    showMessages(chatMessages);
-                    App.getAppInstance().hideLoading();
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable throwable) throws Exception {
 
-                }
-            });*/
-
-            Observer progressObserver = new Observer<Integer>() {
-
-                @Override
-                public void onSubscribe(Disposable d) {
-                    Log.e("ON CHAT ACTIVITY","IMAGE UPLOAD::::::");
-                }
-
-                @Override
-                public void onNext(Integer value) {
-
-                    Log.e("ON CHAT ACTIVITY",value+ "IMAGE UPLOAD::::::");
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                }
-
-                @Override
-                public void onComplete() {
-                }
-            };
-
-            SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,progressObserver)
-                .attachMedia(imagePath)
-                .messageType(MessageType.IMAGE).build();
+            SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,null)
+                .attachMedia(filePath)
+                .messageType(type).build();
             sendRequest.send().subscribe(new Consumer<Messages>() {
                 @Override
                 public void accept(Messages messages) throws Exception {
@@ -194,7 +156,12 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     App.getAppInstance().hideLoading();
                 }
             });
-
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        AudioPlayerManager.getInstance().release();
     }
 }
