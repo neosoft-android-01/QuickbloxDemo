@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="quickblox-android-sdk-chat-3.3.1">
     <CLASSES>
-      <root url="file://$USER_HOME$/.android/build-cache/81d1daccb0071e35a671e2c1e7c5b0b1c205b91c/output/res" />
-      <root url="jar://$USER_HOME$/.android/build-cache/81d1daccb0071e35a671e2c1e7c5b0b1c205b91c/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/650462bb46c4548e2354c084b6dcc94ba4f719de/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/650462bb46c4548e2354c084b6dcc94ba4f719de/output/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

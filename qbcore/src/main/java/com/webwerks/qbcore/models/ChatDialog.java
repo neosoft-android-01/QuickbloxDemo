@@ -194,7 +194,7 @@ public class ChatDialog extends RealmObject {
 
 
 
-    enum DialogType{
+    public enum DialogType{
         GROUP,
         ONE_TO_ONE;
     }

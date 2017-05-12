@@ -5,6 +5,7 @@ import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.Messages;
@@ -13,6 +14,7 @@ import com.webwerks.qbcore.models.User;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -55,6 +57,22 @@ public class ChatManager {
 
     public void initSession(ChatDialog dialog,IncomingMessageListener listener){
         QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
+
+
+        if(chatDialog.getType().equals(QBDialogType.GROUP)){
+            ChatDialogManager.joinGroup(dialog).subscribe(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean aBoolean) throws Exception {
+
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+
+                }
+            });
+        }
+
         chatMessageListener=new ChatMessageListener();
         chatDialog.addMessageListener(chatMessageListener);
         chatDialog.initForChat(chatService);
@@ -80,10 +98,6 @@ public class ChatManager {
 
         // stream management
         chatService.setUseStreamManagement(true);
-    }
-
-    public  Observable createChatDialog(User user){
-        return ChatDialogManager.createChatDialogFromUser(User.toQBUser(user));
     }
 
     public boolean isLogged() {

@@ -75,13 +75,13 @@ public class AttachmentManager {
                         @Override
                         public void onProgressUpdate(final int i) {
                        /* Observable.create(new ObservableOnSubscribe<Integer>() {
-                            @Override
-                            public void subscribe(ObservableEmitter<Integer> e) throws Exception {
-                                e.onNext(i);
-                            }
-                        }).subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(progressUpdate);*/
+                                @Override
+                                public void subscribe(ObservableEmitter<Integer> e) throws Exception {
+                                    e.onNext(i);
+                                }
+                            }).subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(progressUpdate);*/
                             Log.e("Progress", ":::" + i);
                         }
                     }).perform();

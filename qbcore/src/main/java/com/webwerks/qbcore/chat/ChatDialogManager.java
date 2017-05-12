@@ -1,18 +1,27 @@
 package com.webwerks.qbcore.chat;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.view.View;
 
 import com.quickblox.chat.QBRestChatService;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.chat.utils.DialogUtils;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBRequestGetBuilder;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.database.ChatDialogDbHelper;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.utils.NetworkUtils;
+
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.muc.DiscussionHistory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,12 +79,12 @@ public class ChatDialogManager {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Observable<ChatDialog> createChatDialogFromUser(final QBUser user) {
+    public static Observable<ChatDialog> createGroupChatDialog(final String dialogName, final List<Integer> occupantsId) {
         return Observable.fromCallable(new Callable<ChatDialog>() {
             @Override
             public ChatDialog call() throws Exception {
                 try {
-                    QBChatDialog dialog = QBRestChatService.createChatDialog(createDialog(user)).perform();
+                    QBChatDialog dialog  = QBRestChatService.createChatDialog(createGroupDialog(dialogName,occupantsId)).perform();
                     ChatDialog chatDialog = ChatDialog.createChatDialog(dialog);
                     ChatDialogDbHelper.getInstance().saveDialogToDb(chatDialog);
                     return chatDialog;
@@ -89,8 +98,51 @@ public class ChatDialogManager {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private static QBChatDialog createDialog(QBUser qbUser) {
-        return DialogUtils.buildDialog(qbUser);
+    public static Observable<ChatDialog> createPrivateChatDialog(final int participantId) {
+        // final QBUser qbUser=User.toQBUser(user);
+
+        return Observable.fromCallable(new Callable<ChatDialog>() {
+            @Override
+            public ChatDialog call() throws Exception {
+                try {
+                    QBChatDialog dialog  = QBRestChatService.createChatDialog(DialogUtils.buildPrivateDialog(participantId)).perform();;
+                    ChatDialog chatDialog = ChatDialog.createChatDialog(dialog);
+                    ChatDialogDbHelper.getInstance().saveDialogToDb(chatDialog);
+                    return chatDialog;
+                } catch (QBResponseException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getLocalizedMessage());
+                }
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable<ChatDialog> createPrivateChatDialog(User user) {
+        final QBUser qbUser=User.toQBUser(user);
+
+        return Observable.fromCallable(new Callable<ChatDialog>() {
+            @Override
+            public ChatDialog call() throws Exception {
+                try {
+                    QBChatDialog dialog  = QBRestChatService.createChatDialog(DialogUtils.buildDialog(qbUser)).perform();;
+                    ChatDialog chatDialog = ChatDialog.createChatDialog(dialog);
+                    ChatDialogDbHelper.getInstance().saveDialogToDb(chatDialog);
+                    return chatDialog;
+                } catch (QBResponseException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getLocalizedMessage());
+                }
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    // for GROUP
+    private static QBChatDialog createGroupDialog(String dialogName,List<Integer> occupantsId){
+        return DialogUtils.buildDialog(dialogName, QBDialogType.GROUP,occupantsId);
     }
 
     public static Observable<List<Messages>> getDialogMessages(final ChatDialog dialog) {
@@ -119,6 +171,52 @@ public class ChatDialogManager {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable<Boolean> joinGroup(final ChatDialog chatDialog){
+
+        return Observable.fromCallable(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                QBChatDialog qbChatDialog=ChatDialog.toQbChatDialog(chatDialog);
+                DiscussionHistory history = new DiscussionHistory();
+                history.setMaxStanzas(0);
+                try {
+                    qbChatDialog.join(history);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getMessage());
+                } catch (SmackException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getMessage());
+                }
+
+                return true;
+            }
+        });
+
+
+
+    }
+
+    public static Observable<Boolean>  leaveGroup(final ChatDialog chatDialog){
+
+        return Observable.fromCallable(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                QBChatDialog qbChatDialog=ChatDialog.toQbChatDialog(chatDialog);
+                try {
+                    qbChatDialog.leave();
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getMessage());
+                } catch (SmackException.NotConnectedException e) {
+                    e.printStackTrace();
+                    throw new Exception(e.getMessage());
+                }
+                return true;
+            }
+        });
     }
 
     public static Observable getDialogFromId(String id){

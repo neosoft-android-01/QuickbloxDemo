@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.quickblox.chat.model.QBChatDialog;
+import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.User;
@@ -15,6 +16,7 @@ import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.functions.Consumer;
 
@@ -31,7 +33,7 @@ public class UsersViewModel {
     }
 
     public void onUserClick(User user){
-        ChatManager.getInstance().createChatDialog(user).subscribe(new Consumer() {
+       /* ChatDialogManager.createPrivateChatDialog(user).subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
                 ChatDialog dialog = (ChatDialog) o;
@@ -41,7 +43,25 @@ public class UsersViewModel {
             @Override
             public void accept(Throwable throwable) throws Exception {
             }
+        });*/
+
+        List<Integer> occupantList=new ArrayList<>();
+        occupantList.add(App.getAppInstance().getCurrentUser().id);
+        occupantList.add(user.id);
+        occupantList.add(27549421);
+
+        ChatDialogManager.createPrivateChatDialog(user.id).subscribe(new Consumer<ChatDialog>() {
+            @Override
+            public void accept(ChatDialog chatDialog) throws Exception {
+                ChatDialog dialog = chatDialog;
+                navigateNext(dialog);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+            }
         });
+
     }
 
     public void chatDialogClick(ChatDialog dialog){
