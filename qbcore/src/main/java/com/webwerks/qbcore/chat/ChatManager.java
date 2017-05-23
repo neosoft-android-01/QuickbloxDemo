@@ -1,5 +1,7 @@
 package com.webwerks.qbcore.chat;
 
+import android.util.Log;
+
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
@@ -47,7 +49,9 @@ public class ChatManager {
     private class ChatMessageListener implements QBChatDialogMessageListener {
         @Override
         public void processMessage(String s, QBChatMessage qbChatMessage, Integer integer) {
-            messageReceivedListener.onMessageReceived(Messages.getChatMessage(qbChatMessage));
+            if(!QBChatService.getInstance().getUser().getId().equals(integer)) {
+                messageReceivedListener.onMessageReceived(Messages.getChatMessage(qbChatMessage));
+            }
         }
 
         @Override
@@ -57,22 +61,6 @@ public class ChatManager {
 
     public void initSession(ChatDialog dialog,IncomingMessageListener listener){
         QBChatDialog chatDialog=ChatDialog.toQbChatDialog(dialog);
-
-
-        if(chatDialog.getType().equals(QBDialogType.GROUP)){
-            ChatDialogManager.joinGroup(dialog).subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean aBoolean) throws Exception {
-
-                }
-            }, new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable throwable) throws Exception {
-
-                }
-            });
-        }
-
         chatMessageListener=new ChatMessageListener();
         chatDialog.addMessageListener(chatMessageListener);
         chatDialog.initForChat(chatService);
@@ -89,12 +77,13 @@ public class ChatManager {
         QBChatService.ConfigurationBuilder configurationBuilder=new QBChatService.ConfigurationBuilder();
         configurationBuilder.setKeepAlive(true).setSocketTimeout(0);
         configurationBuilder.setUseTls(true);
+        configurationBuilder.setAutojoinEnabled(true);
+
         QBChatService.setConfigurationBuilder(configurationBuilder);
         QBChatService.setDebugEnabled(true);
         QBChatService.setDefaultPacketReplyTimeout(10000);
 
         chatService = QBChatService.getInstance();
-        //chatService.addConnectionListener(chatConnectionListener);
 
         // stream management
         chatService.setUseStreamManagement(true);
@@ -127,44 +116,5 @@ public class ChatManager {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-
-    /*private ConnectionListener chatConnectionListener=new ConnectionListener() {
-        @Override
-        public void connected(XMPPConnection xmppConnection) {
-            Log.d(TAG,"CONNECTED");
-        }
-
-        @Override
-        public void authenticated(XMPPConnection xmppConnection, boolean b) {
-            Log.d(TAG,"AUTHENTICATED");
-        }
-
-        @Override
-        public void connectionClosed() {
-            Log.d(TAG,"CONNECTION CLOSED");
-        }
-
-        @Override
-        public void connectionClosedOnError(Exception e) {
-            Log.d(TAG,"CONNECTION CLOSED ERROR " + e.getLocalizedMessage());
-        }
-
-        @Override
-        public void reconnectionSuccessful() {
-            Log.d(TAG,"RECONNECTION SUCCESSFUL");
-        }
-
-        @Override
-        public void reconnectingIn(int i) {
-            if (i % 5 == 0) {
-                Log.e(TAG,"reconnectingIn: " + i);
-            }
-        }
-
-        @Override
-        public void reconnectionFailed(Exception e) {
-            Log.d(TAG,"RECONNECTION ERROR " + e.getLocalizedMessage());
-        }
-    };*/
 
 }

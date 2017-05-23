@@ -33,7 +33,7 @@ public class UsersViewModel {
     }
 
     public void onUserClick(User user){
-       /* ChatDialogManager.createPrivateChatDialog(user).subscribe(new Consumer() {
+        ChatDialogManager.createPrivateChatDialog(user).subscribe(new Consumer() {
             @Override
             public void accept(Object o) throws Exception {
                 ChatDialog dialog = (ChatDialog) o;
@@ -43,14 +43,14 @@ public class UsersViewModel {
             @Override
             public void accept(Throwable throwable) throws Exception {
             }
-        });*/
+        });
 
-        List<Integer> occupantList=new ArrayList<>();
+        /*List<Integer> occupantList=new ArrayList<>();
         occupantList.add(App.getAppInstance().getCurrentUser().id);
         occupantList.add(user.id);
         occupantList.add(27549421);
 
-        ChatDialogManager.createPrivateChatDialog(user.id).subscribe(new Consumer<ChatDialog>() {
+        ChatDialogManager.createGroupChatDialog("GROUP 1",occupantList).subscribe(new Consumer<ChatDialog>() {
             @Override
             public void accept(ChatDialog chatDialog) throws Exception {
                 ChatDialog dialog = chatDialog;
@@ -60,7 +60,7 @@ public class UsersViewModel {
             @Override
             public void accept(Throwable throwable) throws Exception {
             }
-        });
+        });*/
 
     }
 

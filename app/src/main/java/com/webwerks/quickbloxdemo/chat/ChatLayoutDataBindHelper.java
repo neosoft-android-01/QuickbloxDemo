@@ -77,7 +77,7 @@ public class ChatLayoutDataBindHelper {
                 sent = false;
         }
 
-        FileUtil.getAttachmentPath(Integer.parseInt(message.getAttachments().get(0).getId()), MessageType.IMAGE)
+        FileUtil.getAttachmentPath(message.getAttachments().get(0), MessageType.IMAGE)
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) throws Exception {
@@ -115,6 +115,7 @@ public class ChatLayoutDataBindHelper {
             timeParams.leftMargin=30;
         }
         holder.rlImageView.setLayoutParams(params);
+        holder.rlImageView.setPadding(20,20,20,20);
         holder.lblTime.setLayoutParams(timeParams);
     }
 
@@ -282,7 +283,7 @@ public class ChatLayoutDataBindHelper {
                 final int fileId=Integer.parseInt(messages.getAttachments().get(0).getId());
                 switch ((String)view.getTag()/*messages.getState()*/){
                     case Constant.AUDIO_STATE_DOWNLOAD:
-                        FileUtil.getAttachmentPath(fileId, MessageType.AUDIO)
+                        FileUtil.getAttachmentPath(messages.getAttachments().get(0), MessageType.AUDIO)
                                 .subscribe(new Consumer<String>() {
                                     @Override
                                     public void accept(String s) throws Exception {
@@ -308,7 +309,7 @@ public class ChatLayoutDataBindHelper {
                         if(AudioPlayerManager.getInstance().getCurrentFileId()!=fileId) {
 
                             AudioPlayerManager.getInstance().release();
-                            FileUtil.getAttachmentPath(Integer.parseInt(((Messages) holder.btnDownload.getTag(R.id.audio_data)).getAttachments().get(0).getId()), MessageType.AUDIO)
+                            FileUtil.getAttachmentPath(((Messages) holder.btnDownload.getTag(R.id.audio_data)).getAttachments().get(0), MessageType.AUDIO)
                                     .subscribe(new Consumer<String>() {
                                         @Override
                                         public void accept(String s) throws Exception {

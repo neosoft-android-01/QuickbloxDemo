@@ -1,20 +1,26 @@
 package com.webwerks.quickbloxdemo.chat;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.quickblox.chat.model.QBAttachment;
 import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.IncomingMessageListener;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
+import com.webwerks.qbcore.models.LocationAttachment;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.qbcore.utils.Constant;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.audio.AudioPlayerManager;
 import com.webwerks.quickbloxdemo.chat.location.UploadLocation;
@@ -26,12 +32,15 @@ import com.webwerks.quickbloxdemo.utils.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.Map;
 
-import io.reactivex.disposables.Disposable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by webwerks on 17/4/17.
@@ -43,6 +52,8 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     ChatAdapter adapter;
     ArrayList<Messages> messages;
     RecyclerView lstChat;
+
+
 
     @Override
     public int getContentLayout() {
@@ -59,6 +70,12 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
             @Override
             public void accept(Object o) throws Exception {
                 currentDialog = (ChatDialog) o;
+
+                if(currentDialog.getType()== ChatDialog.DialogType.GROUP)
+                    binding.btnLeaveGrp.setVisibility(View.VISIBLE);
+                else
+                    binding.btnLeaveGrp.setVisibility(View.GONE);
+
                 ChatManager.getInstance().initSession(currentDialog, ChatActivity.this);
 
                 App.getAppInstance().showLoading(ChatActivity.this);
@@ -102,6 +119,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Glide.get(this).clearMemory();
         ChatManager.getInstance().stopSession(currentDialog);
     }
 
@@ -145,9 +163,63 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
         }
     }
 
-    public void sendAttachment(File filePath,MessageType type) {
+    public void sendAttachment(final File filePath,final MessageType type) {
         if (filePath != null) {
-            App.getAppInstance().showLoading(this);
+            Single.just(new Messages()).map(new Function<Messages, Messages>() {
+                @Override
+                public Messages apply(Messages msg) throws Exception {
+                    msg.setChatDialogId(currentDialog.getDialogId());
+                    msg.setId(App.getAppInstance().getCurrentUser().id+"");
+
+                    QBAttachment qbAttachment=new QBAttachment(QBAttachment.IMAGE_TYPE);
+                    qbAttachment.setContentType(QBAttachment.IMAGE_TYPE);
+                    qbAttachment.setUrl(filePath.getPath());
+
+                    List<QBAttachment> attachments=new ArrayList<>();
+                    attachments.add(qbAttachment);
+                    msg.setMessageType(type);
+                    msg.setAttachments(attachments);
+                    msg.setDateSent(System.currentTimeMillis() / 1000);
+                    return msg;
+                }
+            }).subscribe(new Consumer<Messages>() {
+                @Override
+                public void accept(final Messages m) throws Exception {
+                    m.setInProgress(true);
+                    showMessages(m);
+                    SendMessageRequest sendRequest = new SendMessageRequest.Builder(currentDialog, null)
+                            .setTime(m.getDateSent())
+                            .attachMedia(filePath)
+                            .messageType(type).build();
+                    sendRequest.send().subscribe(new Consumer<Messages>() {
+                        @Override
+                        public void accept(Messages messages) throws Exception {
+                            m.setInProgress(false);
+                            m.setId(messages.getId());
+                            m.setChatDialogId(messages.getChatDialogId());
+                            if(messages.getDeliveredIds()!=null)
+                                m.setDateSent(messages.getDateSent());
+                            if(messages.getReadIds()!=null)
+                                m.setDeliveredIds(messages.getDeliveredIds());
+                            m.setReadIds(messages.getReadIds());
+                            m.setMsg(messages.getMsg());
+                            m.setRecipientId(messages.getRecipientId());
+                            m.setSenderId(messages.getSenderId());
+                            m.setAttachments(messages.getAttachments());
+                            m.setLocationAttachment(messages.getLocationAttachment());
+                            m.setMessageType(messages.getMessageType());
+
+                            updateMessageData();
+                        }
+                    });
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                }
+            });
+
+            /*App.getAppInstance().showLoading(this);
 
             SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,null)
                 .attachMedia(filePath)
@@ -158,8 +230,13 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     showMessages(messages);
                     App.getAppInstance().hideLoading();
                 }
-            });
+            });*/
         }
+    }
+
+    public void updateMessageData(){
+        //adapter.update(oldMessage);
+        adapter.notifyDataSetChanged();
     }
 
     @Override

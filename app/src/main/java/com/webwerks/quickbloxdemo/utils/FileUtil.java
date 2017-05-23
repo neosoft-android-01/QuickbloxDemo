@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.quickblox.chat.model.QBAttachment;
 import com.webwerks.qbcore.chat.AttachmentManager;
 import com.webwerks.qbcore.models.MessageType;
 
@@ -20,8 +21,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by webwerks on 27/4/17.
@@ -90,93 +93,30 @@ public class FileUtil {
         return new File(folder.getPath() + File.separator + "IMG_" + fileId + ".png");
     }
 
-    public static Observable<String> getAttachmentPath(int fileId, MessageType type){
+    public static Observable<String> getAttachmentPath(final QBAttachment qbAttachment, MessageType type){
         File file=null;
-        switch (type){
-            case IMAGE:
-                file=getImageFile(fileId);
-                break;
+        if(!TextUtils.isEmpty(qbAttachment.getUrl()) && !qbAttachment.getUrl().contains("http")){
+            return Observable.fromCallable(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    return new File(qbAttachment.getUrl()).getPath();
+                }
+            }).subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread());
+        }else {
 
-            case AUDIO:
-                file=getAudioFile(fileId);
-                break;
+            int fileId = Integer.parseInt(qbAttachment.getId());
+            switch (type) {
+                case IMAGE:
+                    file = getImageFile(fileId);
+                    break;
+
+                case AUDIO:
+                    file = getAudioFile(fileId);
+                    break;
+            }
+            return AttachmentManager.processReceivedAttachment(fileId, file);
         }
-
-
-        return AttachmentManager.processReceivedAttachment(fileId,file);
-
-        /*return Observable.fromCallable(new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-
-                File folder = new File(Environment.getExternalStorageDirectory() + "/Chat/image");
-                boolean success = true;
-                if (!folder.exists()) {
-                    success = folder.mkdirs();
-                }
-                File file = new File(folder.getPath() + File.separator + "IMG_" + fileId + ".png");
-
-                if(file.exists()){
-                    return file.getPath();
-                }else{
-                    try {
-                        InputStream in =null;
-                        int responseCode = -1;
-                        URL url = new URL(fileUrl);
-                        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-                        con.setDoInput(true);
-                        con.connect();
-                        responseCode = con.getResponseCode();
-                        if(responseCode == HttpURLConnection.HTTP_OK) {
-                            //download
-                            in = con.getInputStream();
-                            OutputStream output = new FileOutputStream(file);
-                            IOUtils.copy(in, output);
-
-                            output.close();
-                            return file.getPath();
-                        }else{
-                            Log.e("ERROR",streamToString(con.getErrorStream()));
-                            return con.getErrorStream().toString();
-                        }
-                    }catch (Exception e){
-                        throw new Exception(e.getMessage());
-                    }
-                }
-            }
-        })*/
-
-        /*AttachmentManager.processReceivedAttachment(fileId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io()).map(new Function<InputStream, String>() {
-            @Override
-            public String apply(InputStream inputStream) throws Exception {
-
-                try {
-                    if(inputStream!=null) {
-
-                        File folder = new File(Environment.getExternalStorageDirectory() + "/Chat/image");
-                        boolean success = true;
-                        if (!folder.exists()) {
-                            success = folder.mkdirs();
-                        }
-                        File file = new File(folder.getPath() + File.separator + "IMG_" + fileId + ".png");
-                        OutputStream output = new FileOutputStream(file);
-                        IOUtils.copy(inputStream, output);
-
-                        output.close();
-                        return file.getPath();
-                    }else{
-                        return "";
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace(); // handle exception, define IOException and others
-                    throw new Exception(e.getMessage());
-                }
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());*/
 
     }
 

@@ -14,7 +14,6 @@ import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.utils.Constant;
 
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ public class SendMessageRequest {
     private final LocationAttachment locationAttachment;
     private final MessageType type;
     private Observer<Integer> progressUpdate;
+    private final long sentTime;
 
     private SendMessageRequest(Builder builder){
         this.chatDialog=builder.chatDialog;
@@ -47,6 +47,7 @@ public class SendMessageRequest {
         this.mediaAttachment=builder.mediaAttachment;
         this.locationAttachment=builder.locationAttachment;
         this.type=builder.type;
+        this.sentTime=builder.sentTime;
         this.progressUpdate=builder.progressUpdate;
     }
 
@@ -58,6 +59,7 @@ public class SendMessageRequest {
         private LocationAttachment locationAttachment;
         private MessageType type;
         private Observer<Integer> progressUpdate;
+        private long sentTime;
 
         public Builder(ChatDialog dialog,Observer<Integer> progressUpdate) {
             this.chatDialog = dialog;
@@ -86,6 +88,11 @@ public class SendMessageRequest {
             return this;
         }
 
+        public Builder setTime(long sentTime){
+            this.sentTime=sentTime;
+            return this;
+        }
+
         public SendMessageRequest build() {
             return new SendMessageRequest(this);
         }
@@ -96,45 +103,45 @@ public class SendMessageRequest {
             if (mediaAttachment != null && mediaAttachment.size()>0) {
                 return AttachmentManager.uploadMediaAttachment(mediaAttachment.get(0),progressUpdate)
                         .concatMap(new Function<QBFile, ObservableSource<Messages>>() {
-                    @Override
-                    public ObservableSource<Messages> apply(QBFile qbFile) throws Exception {
+                            @Override
+                            public ObservableSource<Messages> apply(QBFile qbFile) throws Exception {
 
-                        String attachmentType="";
-                        switch (type){
-                            case IMAGE:
-                            case LOCATION:
-                                if(mediaAttachment.get(0).getPath().contains("Chat")) {
-                                    File imageFile = new File(Environment.getExternalStorageDirectory().getPath()
-                                            + "/Chat/image" +  File.separator + "IMG_" + qbFile.getId()  + ".png");
-                                    boolean success = mediaAttachment.get(0).renameTo(imageFile);
-                                    mediaAttachment.get(0).delete();
+                                String attachmentType="";
+                                switch (type){
+                                    case IMAGE:
+                                    case LOCATION:
+                                        if(mediaAttachment.get(0).getPath().contains("PocketLocal")) {
+                                            File imageFile = new File(Environment.getExternalStorageDirectory().getPath()
+                                                    + "/PocketLocal/image" +  File.separator + "IMG_" + qbFile.getId()  + ".png");
+                                            boolean success = mediaAttachment.get(0).renameTo(imageFile);
+                                            mediaAttachment.get(0).delete();
+                                        }
+                                        attachmentType=QBAttachment.IMAGE_TYPE;
+                                        break;
+
+                                    case VIDEO:
+                                        attachmentType=QBAttachment.VIDEO_TYPE;
+                                        break;
+
+                                    case AUDIO:
+                                        if(mediaAttachment.get(0).getPath().contains("PocketLocal")) {
+                                            File audioFile = new File(Environment.getExternalStorageDirectory().getPath()
+                                                    + "/PocketLocal/audio" + File.separator + "AUD_" + qbFile.getId() + ".mp3");
+                                            boolean success = mediaAttachment.get(0).renameTo(audioFile);
+                                            mediaAttachment.get(0).delete();
+                                        }
+                                        attachmentType=QBAttachment.AUDIO_TYPE;
+                                        break;
                                 }
-                                attachmentType=QBAttachment.IMAGE_TYPE;
-                                break;
 
-                            case VIDEO:
-                                attachmentType=QBAttachment.VIDEO_TYPE;
-                                break;
-
-                            case AUDIO:
-                                if(mediaAttachment.get(0).getPath().contains("Chat")) {
-                                    File audioFile = new File(Environment.getExternalStorageDirectory().getPath()
-                                            + "/Chat/audio" + File.separator + "AUD_" + qbFile.getId() + ".mp3");
-                                    boolean success = mediaAttachment.get(0).renameTo(audioFile);
-                                    mediaAttachment.get(0).delete();
-                                }
-                                attachmentType=QBAttachment.AUDIO_TYPE;
-                                break;
-                        }
-
-                        QBAttachment attachment = new QBAttachment(attachmentType);
-                        attachment.setId(qbFile.getId().toString());
-                        attachment.setUrl(qbFile.getPrivateUrl());
-                        return sendMessage(attachment)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread());
-                    }
-                });
+                                QBAttachment attachment = new QBAttachment(attachmentType);
+                                attachment.setId(qbFile.getId().toString());
+                                attachment.setUrl(qbFile.getPrivateUrl());
+                                return sendMessage(attachment)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread());
+                            }
+                        });
             } else {
                 return sendMessage(null)
                         .subscribeOn(Schedulers.io())
@@ -172,7 +179,7 @@ public class SendMessageRequest {
                         chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_MAP_IMG,locationAttachment.getUrl());
                     }
                     chatMessage.setSaveToHistory(true); // Save a message to history
-                    chatMessage.setDateSent(System.currentTimeMillis() / 1000);
+                    chatMessage.setDateSent(sentTime==0?System.currentTimeMillis() / 1000:sentTime);
                     chatMessage.setMarkable(true);
                     qbChatDialog.sendMessage(chatMessage);
                     return Messages.getChatMessage(chatMessage);

@@ -18,6 +18,13 @@
 
         <include layout="@layout/toolbar" />
 
+        <Button
+            android:id="@+id/btnLeaveGrp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LEAVE GROUP"
+            android:onClick="@{() -> viewModel.leaveGroupClick()}"></Button>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -91,17 +98,6 @@
                         android:layout_marginLeft="30dp"
                         android:orientation="horizontal">
 
-                        <!-- <TextView
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:layout_gravity="center_vertical"
-                             android:layout_marginTop="1dp"
-                             android:drawableLeft="@drawable/ic_prev"
-                             android:text="Slide To cancel"
-                             android:textColor="@android:color/white"
-                             android:gravity="center_vertical"
-                             />
--->
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

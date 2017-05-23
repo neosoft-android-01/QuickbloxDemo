@@ -2,6 +2,7 @@ package com.webwerks.quickbloxdemo.chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         messages.add(msg);
         notifyDataSetChanged();
     }
+
+    /*public void update(Messages oldMessage){
+      //  int i=messages.indexOf(oldMessage);
+        //Log.e("CHAT ADAPTER",i +"::"+messages.contains(oldMessage));
+
+      //  messages.remove(i);
+       // messages.add(i,newMessage);
+        notifyDataSetChanged();
+    }*/
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -82,6 +92,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ChatLayoutDataBindHelper.configureAudioAttachment(this,mContext,(AudioAttachmentHolder) holder,message);
                 break;
         }
+            //replace the alpha logic with message.getPregress()
+            if(message.isInProgress()){
+                holder.itemView.setAlpha(0.7f);
+            }else{
+                holder.itemView.setAlpha(1.0f);
+            }
+
     }
 
     @Override

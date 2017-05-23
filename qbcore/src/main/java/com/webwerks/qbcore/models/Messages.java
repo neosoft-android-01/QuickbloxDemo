@@ -31,6 +31,24 @@ public class Messages {
     private RealmList<RealmAttachment> attachments;
     private LocationAttachment locationAttachment;
     private MessageType messageType;
+    private int progress;
+    boolean inProgress;
+
+    public boolean isInProgress() {
+        return inProgress;
+    }
+
+    public void setInProgress(boolean inProgress) {
+        this.inProgress = inProgress;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
 
     public String getState() {
         return state;
@@ -150,7 +168,9 @@ public class Messages {
     }
 
     public List<Integer> getDeliveredIds() {
-        return RealmHelper.fromIntegerRelamList(deliveredIds);
+        if(deliveredIds!=null)
+            return RealmHelper.fromIntegerRelamList(deliveredIds);
+        return new ArrayList<>();
     }
 
     public void setDeliveredIds(List<Integer> deliveredIds) {
@@ -158,7 +178,9 @@ public class Messages {
     }
 
     public List<Integer> getReadIds() {
-        return RealmHelper.fromIntegerRelamList(readIds);
+        if(readIds!=null)
+            return RealmHelper.fromIntegerRelamList(readIds);
+        return new ArrayList<>();
     }
 
     public void setReadIds(List<Integer> readIds) {

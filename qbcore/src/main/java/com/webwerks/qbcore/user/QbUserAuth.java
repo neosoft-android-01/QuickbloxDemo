@@ -26,14 +26,14 @@ public class QbUserAuth {
 
     public static String TAG="QbUserAuth";
 
-    public static Single<User> createNewUser(final QBUser user){
+    public static Single<User> createNewUser(final User user){
         return Single.just(user)
-                .map(new Function<QBUser, User>() {
+                .map(new Function<User, User>() {
                     @Override
-                    public User apply(QBUser user) throws Exception {
+                    public User apply(User user) throws Exception {
                         try {
-                            QBUser respoUser = QBUsers.signUp(user).perform();
-                            respoUser.setPassword(user.getPassword());
+                            QBUser respoUser = QBUsers.signUp(User.toQBUser(user)).perform();
+                            respoUser.setPassword(user.password);
                             User dbUser = User.fromQbUser(respoUser);
                             UserDbHelper.getInstance().saveUserToDb(dbUser);
                             return dbUser;
@@ -47,14 +47,14 @@ public class QbUserAuth {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Single<User> login(QBUser user){
+    public static Single<User> login(User user){
         return Single.just(user)
-                .map(new Function<QBUser, User>() {
+                .map(new Function<User, User>() {
                     @Override
-                    public User apply(QBUser user) throws Exception {
+                    public User apply(User user) throws Exception {
                         try{
-                            QBUser respoUser = QBUsers.signIn(user).perform();
-                            respoUser.setPassword(user.getPassword());
+                            QBUser respoUser = QBUsers.signIn(User.toQBUser(user)).perform();
+                            respoUser.setPassword(user.password);
                             User dbUser = User.fromQbUser(respoUser);
                             UserDbHelper.getInstance().saveUserToDb(dbUser);
                             return dbUser;

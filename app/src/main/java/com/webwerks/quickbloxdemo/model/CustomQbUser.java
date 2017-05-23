@@ -57,11 +57,11 @@ public class CustomQbUser extends BaseObservable {
         notifyPropertyChanged(BR.lastName);
     }
 
-    public QBUser getQBUser(){
+    /*public QBUser getQBUser(){
         QBUser user=new QBUser();
         user.setEmail(this.email);
         user.setPassword(this.password);
         user.setFullName(this.firstName+" "+this.lastName);
         return user;
-    }
+    }*/
 }

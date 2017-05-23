@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
+import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBGroupChat;
+import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBRestChatService;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
@@ -12,6 +15,7 @@ import com.quickblox.chat.utils.DialogUtils;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBRequestGetBuilder;
+import com.quickblox.core.request.QBRequestUpdateBuilder;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.database.ChatDialogDbHelper;
 import com.webwerks.qbcore.models.ChatDialog;
@@ -99,8 +103,6 @@ public class ChatDialogManager {
     }
 
     public static Observable<ChatDialog> createPrivateChatDialog(final int participantId) {
-        // final QBUser qbUser=User.toQBUser(user);
-
         return Observable.fromCallable(new Callable<ChatDialog>() {
             @Override
             public ChatDialog call() throws Exception {
@@ -121,7 +123,6 @@ public class ChatDialogManager {
 
     public static Observable<ChatDialog> createPrivateChatDialog(User user) {
         final QBUser qbUser=User.toQBUser(user);
-
         return Observable.fromCallable(new Callable<ChatDialog>() {
             @Override
             public ChatDialog call() throws Exception {
@@ -173,54 +174,44 @@ public class ChatDialogManager {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Observable<Boolean> joinGroup(final ChatDialog chatDialog){
-
+    public static Observable<Boolean>  leaveGroup(final ChatDialog chatDialog,final int userId) {
         return Observable.fromCallable(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                QBChatDialog qbChatDialog=ChatDialog.toQbChatDialog(chatDialog);
-                DiscussionHistory history = new DiscussionHistory();
-                history.setMaxStanzas(0);
+                QBChatDialog qbChatDialog = ChatDialog.toQbChatDialog(chatDialog);
                 try {
-                    qbChatDialog.join(history);
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                    throw new Exception(e.getMessage());
-                } catch (SmackException e) {
-                    e.printStackTrace();
-                    throw new Exception(e.getMessage());
-                }
-
-                return true;
-            }
-        });
-
-
-
-    }
-
-    public static Observable<Boolean>  leaveGroup(final ChatDialog chatDialog){
-
-        return Observable.fromCallable(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                QBChatDialog qbChatDialog=ChatDialog.toQbChatDialog(chatDialog);
-                try {
-                    qbChatDialog.leave();
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                    throw new Exception(e.getMessage());
-                } catch (SmackException.NotConnectedException e) {
-                    e.printStackTrace();
+                    QBRequestUpdateBuilder qbRequestBuilder = new QBRequestUpdateBuilder();
+                    qbRequestBuilder.pullAll("occupants_ids", userId);
+                    QBRestChatService.updateGroupChatDialog(qbChatDialog, qbRequestBuilder).perform();
+                } catch (Exception e) {
                     throw new Exception(e.getMessage());
                 }
                 return true;
             }
-        });
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public static Observable getDialogFromId(String id){
-        return ChatDialogDbHelper.getInstance().getDialog(id);
+    public static Observable getDialogFromId(final String id){
+
+        return Observable.fromCallable(new Callable<ChatDialog>() {
+            @Override
+            public ChatDialog call() throws Exception {
+                try{
+                    QBRequestGetBuilder requestBuilder = new QBRequestGetBuilder();
+                    requestBuilder.setLimit(1);
+
+                    return ChatDialog.createChatDialog(QBRestChatService.getChatDialogById(id).perform());
+                }catch (Exception e){
+                    e.printStackTrace();
+                    throw new Exception(e.getLocalizedMessage());
+                }
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+        //return ChatDialogDbHelper.getInstance().getDialog(id);
     }
 
 }

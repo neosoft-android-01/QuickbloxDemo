@@ -31,15 +31,19 @@ public class LoginViewModel {
 
     public void onLoginClick(){
         App.getAppInstance().showLoading(mContext);
-        QbUserAuth.login(loginBinding.getUser().getQBUser()).subscribe(new Consumer<User>() {
+
+        User user=new User();
+        user.email=loginBinding.getUser().getEmail();
+        user.password=loginBinding.getUser().getPassword();
+        user.fullName=loginBinding.getUser().getFirstName()+" "+loginBinding.getUser().getEmail();
+
+        QbUserAuth.login(user).subscribe(new Consumer<User>() {
             @Override
             public void accept(User qbUser) throws Exception {
                 App.getAppInstance().hideLoading();
                 if (qbUser != null) {
                     App.getAppInstance().setCurrentUser(qbUser);
                     loginChat();
-                    Toast.makeText(mContext, "Hello " + qbUser.fullName, Toast.LENGTH_SHORT).show();
-
                 }
             }
         }, new Consumer<Throwable>() {
@@ -55,6 +59,7 @@ public class LoginViewModel {
         ChatManager.getInstance().loginToChat(App.getAppInstance().getCurrentUser()).subscribe(new Consumer<User>() {
             @Override
             public void accept(User user) throws Exception {
+                Toast.makeText(mContext, "Hello " + user.fullName, Toast.LENGTH_SHORT).show();
                 navigateNext();
             }
         }, new Consumer<Throwable>() {
@@ -73,5 +78,4 @@ public class LoginViewModel {
         mContext.startActivity(new Intent(mContext, DashboardActivity.class));
         mContext.finish();
     }
-
 }

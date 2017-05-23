@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
@@ -70,6 +71,20 @@ public class ChatViewModel {
                 }
             });
         }
+    }
+
+    public void leaveGroupClick(){
+        ChatDialogManager.leaveGroup(chatDialog,App.getAppInstance().getCurrentUser().id).subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) throws Exception {
+
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+
+            }
+        });
     }
 
     public void onTextChanged(CharSequence s, int start, int before, int count) {
