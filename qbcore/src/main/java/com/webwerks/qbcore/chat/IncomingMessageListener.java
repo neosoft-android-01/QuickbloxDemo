@@ -8,4 +8,5 @@ import com.webwerks.qbcore.models.Messages;
 
 public interface IncomingMessageListener {
      void onMessageReceived(Messages messages);
+     void onIncomingCall();
 }

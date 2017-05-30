@@ -6,6 +6,7 @@ import com.quickblox.core.request.QBPagedRequestBuilder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.webwerks.qbcore.database.UserDbHelper;
+import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.User;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 /**
  * Created by webwerks on 7/4/17.
@@ -91,6 +93,17 @@ public class QbUserAuth {
                     e.printStackTrace();
                     throw new Exception(getErrorMessage(e.getMessage()));
                 }
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable<User> getUserFromId(final int id){
+        return Observable.fromCallable(new Callable<User>() {
+            @Override
+            public User call() throws Exception {
+                return UserDbHelper.getInstance().getUserFromId(id);
             }
         })
                 .subscribeOn(Schedulers.io())

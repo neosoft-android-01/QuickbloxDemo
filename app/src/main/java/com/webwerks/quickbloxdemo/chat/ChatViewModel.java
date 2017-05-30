@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.telecom.Call;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,6 +21,7 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.webwerks.qbcore.chat.ChatDialogManager;
+import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
@@ -56,6 +58,19 @@ public class ChatViewModel {
         chatBinding=binding;
         mContext=context;
         chatDialog=dialog;
+    }
+
+    public void onAcceptClick(){
+        ((ChatActivity) mContext).stopRingTone();
+        mContext.startActivity(new Intent(mContext, CallActivity.class)
+                .putExtra(Constants.EXTRA_IS_INCOMING_CALL,true));
+        chatBinding.llCall.setVisibility(View.GONE);
+    }
+
+    public void onRejectCall(){
+        ((ChatActivity) mContext).stopRingTone();
+        ChatManager.rejectIncomingCall();
+        chatBinding.llCall.setVisibility(View.GONE);
     }
 
     public void onSendMsgClick(final EditText msg){

@@ -1,7 +1,9 @@
 package com.webwerks.qbcore.database;
 
+import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
@@ -40,6 +42,20 @@ public class UserDbHelper {
        for(User user:userList){
            saveUserToDb(user);
        }
+    }
+
+    public User getUserFromId(final int id){
+        try {
+            realmInstance= Realm.getDefaultInstance();
+            realmInstance.beginTransaction();
+            User user=realmInstance.where(User.class).equalTo("id",id).findFirst();
+            realmInstance.cancelTransaction();
+            return user;
+
+        }finally {
+            if(realmInstance!=null)
+                realmInstance.close();
+        }
     }
 
 }

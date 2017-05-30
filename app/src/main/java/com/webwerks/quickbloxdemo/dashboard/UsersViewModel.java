@@ -44,24 +44,6 @@ public class UsersViewModel {
             public void accept(Throwable throwable) throws Exception {
             }
         });
-
-        /*List<Integer> occupantList=new ArrayList<>();
-        occupantList.add(App.getAppInstance().getCurrentUser().id);
-        occupantList.add(user.id);
-        occupantList.add(27549421);
-
-        ChatDialogManager.createGroupChatDialog("GROUP 1",occupantList).subscribe(new Consumer<ChatDialog>() {
-            @Override
-            public void accept(ChatDialog chatDialog) throws Exception {
-                ChatDialog dialog = chatDialog;
-                navigateNext(dialog);
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
-            }
-        });*/
-
     }
 
     public void chatDialogClick(ChatDialog dialog){

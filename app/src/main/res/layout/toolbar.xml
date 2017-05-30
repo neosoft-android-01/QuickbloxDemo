@@ -5,14 +5,32 @@
     android:layout_height="?android:attr/actionBarSize"
     android:background="@color/colorPrimary">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/lbl_title"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textColor="@android:color/white"
         android:text="Chat"
         android:textSize="20sp"
         android:gravity="center_vertical"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        />
+
+    <Button
+        android:id="@+id/btn_call"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/ic_phone"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:visibility="gone"/>
+
+    </RelativeLayout>
 
 </android.support.v7.widget.Toolbar>

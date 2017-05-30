@@ -35,12 +35,37 @@
                 android:id="@+id/lst_chat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/ll_send"
+                android:layout_above="@+id/ll_call"
                 android:divider="@null"
                 android:dividerHeight="5dp"
                 android:padding="5dp"
                 android:stackFromBottom="true"
                 bind:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+            <LinearLayout
+                android:id="@+id/ll_call"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_above="@+id/ll_send"
+                android:gravity="center_horizontal"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btn_accept"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ACCEPT"
+                    android:onClick="@{() -> viewModel.onAcceptClick()}"/>
+
+                <Button
+                    android:id="@+id/btn_reject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="REJECT"
+                    android:onClick="@{() -> viewModel.onRejectCall()}"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_send"

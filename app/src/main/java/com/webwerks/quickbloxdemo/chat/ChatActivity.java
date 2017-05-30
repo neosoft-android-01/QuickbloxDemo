@@ -1,9 +1,9 @@
 package com.webwerks.quickbloxdemo.chat;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -17,10 +17,8 @@ import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.IncomingMessageListener;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
-import com.webwerks.qbcore.models.LocationAttachment;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
-import com.webwerks.qbcore.utils.Constant;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.audio.AudioPlayerManager;
 import com.webwerks.quickbloxdemo.chat.location.UploadLocation;
@@ -29,31 +27,27 @@ import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
 import com.webwerks.quickbloxdemo.utils.FileUtil;
+import com.webwerks.quickbloxdemo.utils.RingtonePlayer;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by webwerks on 17/4/17.
  */
 
-public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingMessageListener {
+public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingMessageListener,View.OnClickListener {
 
     ChatDialog currentDialog;
     ChatAdapter adapter;
     ArrayList<Messages> messages;
     RecyclerView lstChat;
-
-
+    RingtonePlayer ringtonePlayer;
 
     @Override
     public int getContentLayout() {
@@ -64,6 +58,12 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     public void initializeUiComponents(final ChatBinding binding) {
 
         lstChat = ((RecyclerView) findViewById(R.id.lst_chat));
+        Toolbar toolbar= (Toolbar) findViewById(R.id.toolbar_view);
+        if(toolbar!=null) {
+            toolbar.findViewById(R.id.btn_call).setVisibility(View.VISIBLE);
+            toolbar.findViewById(R.id.btn_call).setOnClickListener(this);
+        }
+
         String dialogId = getIntent().getStringExtra(Constants.EXTRA_DIALOG_ID);
 
         ChatDialogManager.getDialogFromId(dialogId).subscribe(new Consumer() {
@@ -76,7 +76,7 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                 else
                     binding.btnLeaveGrp.setVisibility(View.GONE);
 
-                ChatManager.getInstance().initSession(currentDialog, ChatActivity.this);
+                ChatManager.getInstance().initSession(ChatActivity.this,currentDialog, ChatActivity.this);
 
                 App.getAppInstance().showLoading(ChatActivity.this);
                 ChatDialogManager.getDialogMessages(currentDialog).subscribe(new Consumer() {
@@ -117,10 +117,22 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     }
 
     @Override
+    public void onIncomingCall() {
+        ringtonePlayer=new RingtonePlayer(this,R.raw.beep);
+        ringtonePlayer.play(true);
+        findViewById(R.id.ll_call).setVisibility(View.VISIBLE);
+    }
+
+    public void stopRingTone(){
+        if(ringtonePlayer!=null)
+            ringtonePlayer.stop();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         Glide.get(this).clearMemory();
-        ChatManager.getInstance().stopSession(currentDialog);
+        ChatManager.getInstance().stopSession(this,currentDialog);
     }
 
     @Override
@@ -219,18 +231,6 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                 }
             });
 
-            /*App.getAppInstance().showLoading(this);
-
-            SendMessageRequest sendRequest=new SendMessageRequest.Builder(currentDialog,null)
-                .attachMedia(filePath)
-                .messageType(type).build();
-            sendRequest.send().subscribe(new Consumer<Messages>() {
-                @Override
-                public void accept(Messages messages) throws Exception {
-                    showMessages(messages);
-                    App.getAppInstance().hideLoading();
-                }
-            });*/
         }
     }
 
@@ -243,5 +243,15 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
     public void onBackPressed() {
         super.onBackPressed();
         AudioPlayerManager.getInstance().release();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_call:
+                ChatManager.startCall(this,currentDialog.getOccupantsId());
+                startActivity(new Intent(this, CallActivity.class).putExtra(Constants.EXTRA_IS_INCOMING_CALL,false));
+                break;
+        }
     }
 }
