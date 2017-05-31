@@ -23,7 +23,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="LEAVE GROUP"
-            android:onClick="@{() -> viewModel.leaveGroupClick()}"></Button>
+            android:onClick="@{() -> viewModel.leaveGroupClick()}"
+            android:visibility="gone"/>
 
         <RelativeLayout
             android:layout_width="match_parent"

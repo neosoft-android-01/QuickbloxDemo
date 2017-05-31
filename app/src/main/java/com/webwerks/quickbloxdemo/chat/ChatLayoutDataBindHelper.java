@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
@@ -353,5 +354,14 @@ public class ChatLayoutDataBindHelper {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+    }
+
+    public static void configureCallView(Context context, ChatAdapter.CallHolder holder,Messages messages){
+        holder.lblCallMsg.setText("you we're in a call("+messages.getCallDuration()+")");
+
+        LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.topMargin=10;
+
+        holder.lblCallMsg.setLayoutParams(params);
     }
 }

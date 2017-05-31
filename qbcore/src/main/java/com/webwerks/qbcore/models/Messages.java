@@ -1,5 +1,7 @@
 package com.webwerks.qbcore.models;
 
+import android.text.TextUtils;
+
 import com.quickblox.chat.model.QBAttachment;
 import com.quickblox.chat.model.QBChatMessage;
 import com.webwerks.qbcore.utils.Constant;
@@ -33,6 +35,15 @@ public class Messages {
     private MessageType messageType;
     private int progress;
     boolean inProgress;
+    private String callDuration;
+
+    public String getCallDuration() {
+        return callDuration;
+    }
+
+    public void setCallDuration(String callDuration) {
+        this.callDuration = callDuration;
+    }
 
     public boolean isInProgress() {
         return inProgress;
@@ -251,6 +262,9 @@ public class Messages {
             chatMessages.setLocationAttachment(locationAttachment);
         }
 
+        if(qbChatMessage.getProperty(Constant.QB_CUSTOM_CALL_DURATION)!=null)
+            chatMessages.setCallDuration(qbChatMessage.getProperty(Constant.QB_CUSTOM_CALL_DURATION).toString());
+
         if(chatMessages.getLocationAttachment()!=null){
             chatMessages.setMessageType(MessageType.LOCATION);
         }else if(chatMessages.getAttachments()!=null && chatMessages.getAttachments().size()>0){
@@ -264,6 +278,8 @@ public class Messages {
                 chatMessages.setMessageType(MessageType.VIDEO);
             }
 
+        }else if(!TextUtils.isEmpty(chatMessages.getCallDuration())){
+            chatMessages.setMessageType(MessageType.CALL);
         }else{
             chatMessages.setMessageType(MessageType.TEXT);
         }

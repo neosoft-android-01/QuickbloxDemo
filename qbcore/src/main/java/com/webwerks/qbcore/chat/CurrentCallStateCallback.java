@@ -10,6 +10,6 @@ public interface CurrentCallStateCallback {
 
     void onCallStopped();
 
-    void onCallConnectionClose();
+    void onCallConnectionClose(int callerId);
 
 }

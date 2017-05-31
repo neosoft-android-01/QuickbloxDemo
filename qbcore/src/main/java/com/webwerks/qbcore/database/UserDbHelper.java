@@ -46,12 +46,9 @@ public class UserDbHelper {
 
     public User getUserFromId(final int id){
         try {
-            realmInstance= Realm.getDefaultInstance();
-            realmInstance.beginTransaction();
+            realmInstance=Realm.getDefaultInstance();
             User user=realmInstance.where(User.class).equalTo("id",id).findFirst();
-            realmInstance.cancelTransaction();
-            return user;
-
+            return realmInstance.copyFromRealm(user);
         }finally {
             if(realmInstance!=null)
                 realmInstance.close();

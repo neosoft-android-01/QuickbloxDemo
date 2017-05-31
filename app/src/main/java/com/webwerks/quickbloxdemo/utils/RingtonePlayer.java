@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Vibrator;
 import android.util.Log;
 
 /**
@@ -15,10 +16,12 @@ public class RingtonePlayer {
     private static final String TAG = RingtonePlayer.class.getSimpleName();
     private MediaPlayer mediaPlayer;
     private Context context;
+    private Vibrator vibrator;
 
     public RingtonePlayer(Context context, int resource){
         this.context = context;
         mediaPlayer = android.media.MediaPlayer.create(context, resource);
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     public RingtonePlayer(Context context){
@@ -26,6 +29,7 @@ public class RingtonePlayer {
         Uri notification = getNotification();
         if (notification != null) {
             mediaPlayer = android.media.MediaPlayer.create(context, notification);
+            vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         }
     }
 
@@ -47,6 +51,12 @@ public class RingtonePlayer {
     }
 
     public void play(boolean looping) {
+
+        long[] vibrationCycle = {0, 1000, 1000};
+        if (vibrator.hasVibrator()) {
+            vibrator.vibrate(vibrationCycle, 1);
+        }
+
         Log.i(TAG, "play");
         if (mediaPlayer == null) {
             Log.i(TAG, "mediaPlayer isn't created ");
@@ -54,9 +64,11 @@ public class RingtonePlayer {
         }
         mediaPlayer.setLooping(looping);
         mediaPlayer.start();
+
     }
 
     public synchronized void stop() {
+
         if (mediaPlayer != null) {
             try {
                 mediaPlayer.stop();
@@ -65,6 +77,10 @@ public class RingtonePlayer {
             }
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+
+        if (vibrator != null) {
+            vibrator.cancel();
         }
     }
 

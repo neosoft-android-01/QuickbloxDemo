@@ -62,15 +62,13 @@ public class ChatViewModel {
 
     public void onAcceptClick(){
         ((ChatActivity) mContext).stopRingTone();
-        mContext.startActivity(new Intent(mContext, CallActivity.class)
-                .putExtra(Constants.EXTRA_IS_INCOMING_CALL,true));
+        mContext.startActivityForResult(new Intent(mContext, CallActivity.class)
+                .putExtra(Constants.EXTRA_IS_INCOMING_CALL,true),Constants.CALL);
         chatBinding.llCall.setVisibility(View.GONE);
     }
 
     public void onRejectCall(){
-        ((ChatActivity) mContext).stopRingTone();
         ChatManager.rejectIncomingCall();
-        chatBinding.llCall.setVisibility(View.GONE);
     }
 
     public void onSendMsgClick(final EditText msg){

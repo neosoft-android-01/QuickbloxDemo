@@ -7,16 +7,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginTop="30dp">
 
     <TextView
         android:id="@+id/lbl_outgoing_opponents_names"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:textSize="16sp"
-        android:textStyle="normal"
-        android:text="John, Bob, Merlin"
+        android:textSize="25sp"
+        android:textStyle="bold"
         android:padding="10dp"/>
 
     <TextView

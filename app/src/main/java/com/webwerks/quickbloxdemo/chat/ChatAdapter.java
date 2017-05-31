@@ -25,7 +25,7 @@ import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final int TEXT = 0, PHOTO = 1, LOCATION = 2,AUDIO=3;
+    private final int TEXT = 0, PHOTO = 1, LOCATION = 2,AUDIO=3,CALL=4;
     List<Messages> messages;
     Context mContext;
 
@@ -64,6 +64,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 View audioView=layoutInflater.inflate(R.layout.item_audio_attachment,null);
                 return new AudioAttachmentHolder(audioView);
 
+            case CALL:
+                View callView=layoutInflater.inflate(R.layout.item_call,null);
+                callView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+                return new CallHolder(callView);
+
             case TEXT:
             default:
                 View textView = layoutInflater.inflate(R.layout.item_text_chat, null);
@@ -90,6 +95,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             case AUDIO:
                 ChatLayoutDataBindHelper.configureAudioAttachment(this,mContext,(AudioAttachmentHolder) holder,message);
+                break;
+
+            case CALL:
+                ChatLayoutDataBindHelper.configureCallView(mContext,(CallHolder)holder, message);
                 break;
         }
             //replace the alpha logic with message.getPregress()
@@ -118,6 +127,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             case AUDIO:
                 return AUDIO;
+
+            case CALL:
+                return CALL;
 
             case TEXT:
             default:
@@ -181,6 +193,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             audioProgress= (SeekBar) itemView.findViewById(R.id.sb_audio_progress);
             lblCurrent= (TextView) itemView.findViewById(R.id.lblCurrent);
             lblTotalDuration= (TextView) itemView.findViewById(R.id.lblTotalDuration);
+        }
+    }
+
+    public static class CallHolder extends RecyclerView.ViewHolder{
+
+        TextView lblCallMsg;
+
+        public CallHolder(View itemView) {
+            super(itemView);
+            lblCallMsg= (TextView) itemView.findViewById(R.id.lbl_call_message);
         }
     }
 }

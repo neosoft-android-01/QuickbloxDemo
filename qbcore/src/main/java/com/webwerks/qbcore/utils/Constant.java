@@ -13,6 +13,9 @@ public class Constant {
     public static String QB_CUSTOM_LOCATION_DESC = "locationDesc";
     public static String QB_CUSTOM_LOCATION_MAP_IMG="loc_map_image_url";
 
+    public static String CHAT_CALL="Call";
+    public static String QB_CUSTOM_CALL_DURATION="call_duration";
+
     public static final String AUDIO_STATE_PLAY="PLAY";
     public static final String AUDIO_STATE_PAUSE="PAUSE";
     public static final String AUDIO_STATE_DOWNLOAD="DOWNLOAD";

@@ -40,6 +40,7 @@ public class SendMessageRequest {
     private final MessageType type;
     private Observer<Integer> progressUpdate;
     private final long sentTime;
+    private final String callDuration;
 
     private SendMessageRequest(Builder builder){
         this.chatDialog=builder.chatDialog;
@@ -49,6 +50,7 @@ public class SendMessageRequest {
         this.type=builder.type;
         this.sentTime=builder.sentTime;
         this.progressUpdate=builder.progressUpdate;
+        this.callDuration=builder.callDuration;
     }
 
     public static class Builder{
@@ -60,6 +62,7 @@ public class SendMessageRequest {
         private MessageType type;
         private Observer<Integer> progressUpdate;
         private long sentTime;
+        private String callDuration;
 
         public Builder(ChatDialog dialog,Observer<Integer> progressUpdate) {
             this.chatDialog = dialog;
@@ -90,6 +93,11 @@ public class SendMessageRequest {
 
         public Builder setTime(long sentTime){
             this.sentTime=sentTime;
+            return this;
+        }
+
+        public Builder setCallDuration(String duration){
+            this.callDuration=duration;
             return this;
         }
 
@@ -177,6 +185,11 @@ public class SendMessageRequest {
                         chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_NAME, locationAttachment.getLocationName());
                         chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_DESC, locationAttachment.getLocationDesc());
                         chatMessage.setProperty(Constant.QB_CUSTOM_LOCATION_MAP_IMG,locationAttachment.getUrl());
+                    }
+
+                    if(type==MessageType.CALL){
+                        chatMessage.setBody(Constant.CHAT_CALL);
+                        chatMessage.setProperty(Constant.QB_CUSTOM_CALL_DURATION,callDuration);
                     }
                     chatMessage.setSaveToHistory(true); // Save a message to history
                     chatMessage.setDateSent(sentTime==0?System.currentTimeMillis() / 1000:sentTime);

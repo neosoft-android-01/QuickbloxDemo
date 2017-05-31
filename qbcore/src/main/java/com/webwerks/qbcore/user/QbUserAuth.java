@@ -100,10 +100,14 @@ public class QbUserAuth {
     }
 
     public static Observable<User> getUserFromId(final int id){
+
         return Observable.fromCallable(new Callable<User>() {
             @Override
             public User call() throws Exception {
-                return UserDbHelper.getInstance().getUserFromId(id);
+
+                QBUser qbUser=QBUsers.getUser(id).perform();
+                return User.fromQbUser(qbUser);
+                //return UserDbHelper.getInstance().getUserFromId(id);
             }
         })
                 .subscribeOn(Schedulers.io())

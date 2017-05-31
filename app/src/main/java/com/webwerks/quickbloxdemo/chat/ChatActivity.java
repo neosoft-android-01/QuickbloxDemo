@@ -2,11 +2,13 @@ package com.webwerks.quickbloxdemo.chat;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
@@ -14,6 +16,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.quickblox.chat.model.QBAttachment;
 import com.webwerks.qbcore.chat.ChatDialogManager;
 import com.webwerks.qbcore.chat.ChatManager;
+import com.webwerks.qbcore.chat.CurrentCallStateCallback;
 import com.webwerks.qbcore.chat.IncomingMessageListener;
 import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
@@ -121,6 +124,21 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
         ringtonePlayer=new RingtonePlayer(this,R.raw.beep);
         ringtonePlayer.play(true);
         findViewById(R.id.ll_call).setVisibility(View.VISIBLE);
+        ChatManager.setCurrentCallStateCallback(new CurrentCallStateCallback() {
+            @Override
+            public void onCallStarted() {
+            }
+
+            @Override
+            public void onCallStopped() {
+                ringtonePlayer.stop();
+                findViewById(R.id.ll_call).setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCallConnectionClose(int callerId) {
+            }
+        });
     }
 
     public void stopRingTone(){
@@ -169,6 +187,32 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     if (mediaData != null) {
                         Log.e("PATH", mediaData.getPath() + "::::");
                         sendAttachment(new File(mediaData.getPath()),MessageType.AUDIO);
+                    }
+                    break;
+
+                case Constants.CALL:
+                    if (data != null) {
+                        boolean caller=data.getBooleanExtra("CALLER",false);
+                        final String duration = data.getStringExtra("DURATION");
+                        if(caller){
+                            SendMessageRequest sendRequest = new SendMessageRequest.Builder(currentDialog, null)
+                                    .messageType(MessageType.CALL)
+                                    .setCallDuration(duration).build();
+                            sendRequest.send().subscribe(new Consumer<Messages>() {
+                                @Override
+                                public void accept(Messages messages) throws Exception {
+                                    showMessages(messages);
+                                }
+                            });
+                        }else{
+                            Messages msg=new Messages();
+                            msg.setChatDialogId(currentDialog.getDialogId());
+                            msg.setId(App.getAppInstance().getCurrentUser().id+"");
+                            msg.setMessageType(MessageType.CALL);
+                            msg.setCallDuration(duration);
+                            msg.setDateSent(System.currentTimeMillis() / 1000);
+                            showMessages(msg);
+                        }
                     }
                     break;
             }
@@ -250,7 +294,8 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
         switch (v.getId()){
             case R.id.btn_call:
                 ChatManager.startCall(this,currentDialog.getOccupantsId());
-                startActivity(new Intent(this, CallActivity.class).putExtra(Constants.EXTRA_IS_INCOMING_CALL,false));
+                startActivityForResult(new Intent(this, CallActivity.class)
+                        .putExtra(Constants.EXTRA_IS_INCOMING_CALL,false),Constants.CALL);
                 break;
         }
     }

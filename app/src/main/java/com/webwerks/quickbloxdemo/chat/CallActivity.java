@@ -1,9 +1,11 @@
 package com.webwerks.quickbloxdemo.chat;
 
+import android.content.Intent;
 import android.databinding.ViewDataBinding;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Chronometer;
@@ -14,9 +16,13 @@ import com.quickblox.videochat.webrtc.AppRTCAudioManager;
 import com.quickblox.videochat.webrtc.QBRTCSession;
 import com.webwerks.qbcore.chat.ChatManager;
 import com.webwerks.qbcore.chat.CurrentCallStateCallback;
+import com.webwerks.qbcore.chat.SendMessageRequest;
+import com.webwerks.qbcore.models.MessageType;
+import com.webwerks.qbcore.models.Messages;
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.user.QbUserAuth;
 import com.webwerks.quickbloxdemo.R;
+import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
 
@@ -41,6 +47,7 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
     private Runnable showIncomingCallWindowTask;
     private Handler showIncomingCallWindowTaskHandler;
     private boolean previousDeviceEarPiece;
+    private String callDuration="";
 
     @Override
     public int getContentLayout() {
@@ -65,7 +72,7 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
         }else{
             List<Integer> userList=currentSession.getOpponents();
             for(Integer id:userList){
-                if(id!=currentSession.getCallerID()){
+                if(!id.equals(currentSession.getCallerID())){
                     userId=id;
                     break;
                 }
@@ -79,7 +86,12 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
         QbUserAuth.getUserFromId(userId).subscribe(new Consumer<User>() {
             @Override
             public void accept(User user) throws Exception {
-                ((TextView)findViewById(R.id.lbl_outgoing_opponents_names)).setText(user.fullName);
+                ((TextView) findViewById(R.id.lbl_outgoing_opponents_names)).setText(user.fullName);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                Log.e("ERROR",throwable.getMessage()+"::");
             }
         });
 
@@ -88,6 +100,7 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
             @Override
             public void onClick(View v) {
                 ChatManager.hangUpCall();
+
             }
         });
     }
@@ -103,17 +116,16 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
 
     private void stopTimer() {
         if (timerChronometer != null) {
+            callDuration=timerChronometer.getText()+"";
             timerChronometer.stop();
             isStarted = false;
         }
     }
 
-
     private void initAudioManager() {
         audioManager = AppRTCAudioManager.create(this, new AppRTCAudioManager.OnAudioManagerStateListener() {
             @Override
             public void onAudioChangedState(AppRTCAudioManager.AudioDevice audioDevice) {
-
                 if (audioManager.getSelectedAudioDevice() == AppRTCAudioManager.AudioDevice.EARPIECE) {
                     previousDeviceEarPiece = true;
                 } else if (audioManager.getSelectedAudioDevice() == AppRTCAudioManager.AudioDevice.SPEAKER_PHONE) {
@@ -121,29 +133,18 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
                 }
             }
         });
-
         audioManager.setDefaultAudioDevice(AppRTCAudioManager.AudioDevice.EARPIECE);
-        //previousDeviceEarPiece = true;
-        Log.e("CALL", "AppRTCAudioManager.AudioDevice.EARPIECE");
-
         audioManager.setOnWiredHeadsetStateListener(new AppRTCAudioManager.OnWiredHeadsetStateListener() {
             @Override
             public void onWiredHeadsetStateChanged(boolean plugged, boolean hasMicrophone) {
-                //headsetPlugged = plugged;
-
                 Toast.makeText(CallActivity.this,"Headset " + (plugged ? "plugged" : "unplugged"),Toast.LENGTH_SHORT).show();
-
-                //if (onChangeDynamicCallback != null) {
                     if (!plugged) {
-                        //showToastAfterHeadsetPlugged = false;
                         if (previousDeviceEarPiece) {
                             setAudioDeviceDelayed(AppRTCAudioManager.AudioDevice.EARPIECE);
                         } else {
                             setAudioDeviceDelayed(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE);
                         }
                     }
-                   /* onChangeDynamicCallback.enableDynamicToggle(plugged, previousDeviceEarPiece);
-                }*/
             }
         });
         audioManager.init();
@@ -153,31 +154,9 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                //showToastAfterHeadsetPlugged = true;
                 audioManager.setAudioDevice(audioDevice);
             }
         }, 500);
-    }
-
-    private void setAudioEnabled(boolean isAudioEnabled) {
-        if (currentSession != null && currentSession.getMediaStreamManager() != null) {
-            currentSession.getMediaStreamManager().getLocalAudioTrack().setEnabled(isAudioEnabled);
-        }
-    }
-
-    private void setVideoEnabled(boolean isVideoEnabled) {
-        if (currentSession != null && currentSession.getMediaStreamManager() != null) {
-            currentSession.getMediaStreamManager().getLocalVideoTrack().setEnabled(isVideoEnabled);
-        }
-    }
-
-    private void startIncomeCallTimer(long time) {
-        showIncomingCallWindowTaskHandler.postAtTime(showIncomingCallWindowTask, SystemClock.uptimeMillis() + time);
-    }
-
-    private void stopIncomeCallTimer() {
-        Log.d("CALL", "stopIncomeCallTimer");
-        showIncomingCallWindowTaskHandler.removeCallbacks(showIncomingCallWindowTask);
     }
 
     private void initIncomingCallTask() {
@@ -207,15 +186,26 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
 
     @Override
     public void onCallStopped() {
+        if (audioManager != null) {
+            audioManager.close();
+        }
+        stopTimer();
         if (currentSession == null) {
             Log.e("CALL END", "currentSession = null onCallStopped");
             return;
         }
-        stopTimer();
     }
 
     @Override
-    public void onCallConnectionClose() {
+    public void onCallConnectionClose(int callerId) {
+        Intent output = new Intent();
+        output.putExtra("DURATION", callDuration);
+        if(App.getAppInstance().getCurrentUser().id==callerId) {
+            output.putExtra("CALLER",true);
+        }else{
+            output.putExtra("CALLER",false);
+        }
+        setResult(RESULT_OK, output);
         finish();
     }
 }

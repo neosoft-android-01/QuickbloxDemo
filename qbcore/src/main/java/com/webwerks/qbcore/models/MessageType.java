@@ -10,7 +10,8 @@ public enum MessageType {
     IMAGE("IMAGE"),
     AUDIO("AUDIO"),
     VIDEO("VIDEO"),
-    LOCATION("LOCATION");
+    LOCATION("LOCATION"),
+    CALL("CALL");
 
     private final String text;
 

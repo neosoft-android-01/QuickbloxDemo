@@ -14,4 +14,6 @@ public class Constants {
     public static final int PLACE_PICKER_REQUEST=503;
 
     public static final int GALLERY_AUDIO=504;
+
+    public static final int CALL=505;
 }

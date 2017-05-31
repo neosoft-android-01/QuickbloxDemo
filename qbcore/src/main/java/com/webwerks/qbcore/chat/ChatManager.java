@@ -24,7 +24,6 @@ import com.webwerks.qbcore.models.RealmInteger;
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.utils.RealmHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,19 +70,16 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
     }
 
     public static void acceptIncomingCall(){
-        Log.e("TAG","AcceptCall" + getCurrentSession());
         if(currentSession!=null)
             currentSession.acceptCall(null);
     }
 
     public static void rejectIncomingCall(){
-        Log.e("TAG","RejectCall" + getCurrentSession());
         if(currentSession!=null)
             currentSession.rejectCall(null);
     }
 
     public static void hangUpCall(){
-        Log.e("TAG","HangUp" + getCurrentSession());
         if(currentSession!=null)
             currentSession.hangUp(null);
     }
@@ -96,7 +92,6 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
     public void onReceiveNewSession(QBRTCSession qbrtcSession) {
         Log.e("TAG","NEW REQUEST" + qbrtcSession.getCallerID() + ":::" + qbrtcSession.getUserInfo());
         setCurrentSession(qbrtcSession);
-
         qbrtcSession.addSessionCallbacksListener(this);
         messageReceivedListener.onIncomingCall();
     }
@@ -114,28 +109,35 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
         }
     }
 
+    // Caller not received call
     @Override
     public void onUserNotAnswer(QBRTCSession qbrtcSession, Integer integer) {
         Log.e("TAG","NOT ANSWERING in time" + qbrtcSession.getCallerID());
+        ChatManager.hangUpCall();
     }
 
+    // Callee hung up call
     @Override
-    public void onCallRejectByUser(QBRTCSession qbrtcSession, Integer integer, Map<String, String> map) {
+    public void onCallRejectByUser(QBRTCSession qbrtcSession, Integer userID, Map<String, String> map) {
         Log.e("TAG","REJECTED" + qbrtcSession.getCallerID());
+        if (qbrtcSession.equals(getCurrentSession())) {
+            ChatManager.hangUpCall();
+        }
     }
 
     @Override
     public void onCallAcceptByUser(QBRTCSession qbrtcSession, Integer integer, Map<String, String> map) {
         Log.e("TAG","ACCEPTED" + qbrtcSession.getCallerID());
+        setCurrentSession(qbrtcSession);
+        qbrtcSession.addSessionCallbacksListener(this);
     }
 
+    // Caller hung up the call
     @Override
     public void onReceiveHangUpFromUser(QBRTCSession qbrtcSession, Integer userID, Map<String, String> map) {
         Log.e("TAG","onReceiveHangUpFromUser" +"::"+qbrtcSession.getCallerID() + ":::" + userID);
         if (qbrtcSession.equals(getCurrentSession())) {
-
             if (userID.equals(qbrtcSession.getCallerID())) {
-                Log.d(TAG, "initiator hung up the call");
                 ChatManager.hangUpCall();
             }
         }
@@ -149,8 +151,7 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
                 audioManager.close();
             }*/
             releaseCurrentSession();
-            currentCallStateCallback.onCallConnectionClose();
-
+            currentCallStateCallback.onCallConnectionClose(qbrtcSession.getCallerID());
         }
      }
 
@@ -167,18 +168,15 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
 
     @Override
     public void onConnectionClosedForUser(QBRTCSession qbrtcSession, Integer integer) {
-        //
-        currentCallStateCallback.onCallConnectionClose();
+        currentCallStateCallback.onCallConnectionClose(qbrtcSession.getCallerID());
     }
 
     @Override
     public void onStartConnectToUser(QBRTCSession qbrtcSession, Integer integer) {
-
     }
 
     @Override
     public void onDisconnectedTimeoutFromUser(QBRTCSession qbrtcSession, Integer integer) {
-
     }
 
     @Override
@@ -202,6 +200,18 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
 
         @Override
         public void processError(String s, QBChatException e, QBChatMessage qbChatMessage, Integer integer) {
+        }
+    }
+
+    public static void setAudioEnabled(boolean isAudioEnabled) {
+        if (currentSession != null && currentSession.getMediaStreamManager() != null) {
+            currentSession.getMediaStreamManager().getLocalAudioTrack().setEnabled(isAudioEnabled);
+        }
+    }
+
+    private void setVideoEnabled(boolean isVideoEnabled) {
+        if (currentSession != null && currentSession.getMediaStreamManager() != null) {
+            currentSession.getMediaStreamManager().getLocalVideoTrack().setEnabled(isVideoEnabled);
         }
     }
 
