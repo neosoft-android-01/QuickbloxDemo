@@ -25,6 +25,7 @@ import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.global.App;
 import com.webwerks.quickbloxdemo.global.Constants;
 import com.webwerks.quickbloxdemo.ui.activities.BaseActivity;
+import com.webwerks.quickbloxdemo.utils.RingtonePlayer;
 
 import java.util.List;
 
@@ -119,6 +120,7 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
             callDuration=timerChronometer.getText()+"";
             timerChronometer.stop();
             isStarted = false;
+            Log.e("Enter","stopTimer "+callDuration);
         }
     }
 
@@ -189,6 +191,7 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
         if (audioManager != null) {
             audioManager.close();
         }
+        Log.e("Enter","CALL STOP");
         stopTimer();
         if (currentSession == null) {
             Log.e("CALL END", "currentSession = null onCallStopped");
@@ -198,6 +201,12 @@ public class CallActivity extends BaseActivity implements CurrentCallStateCallba
 
     @Override
     public void onCallConnectionClose(int callerId) {
+        if (audioManager != null) {
+
+            audioManager.close();
+        }
+        Log.e("Enter","onCallConnectionClose");
+        stopTimer();
         Intent output = new Intent();
         output.putExtra("DURATION", callDuration);
         if(App.getAppInstance().getCurrentUser().id==callerId) {

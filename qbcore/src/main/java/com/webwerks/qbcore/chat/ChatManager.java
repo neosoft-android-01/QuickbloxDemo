@@ -1,16 +1,22 @@
 package com.webwerks.qbcore.chat;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBRoster;
 import com.quickblox.chat.QBSignaling;
 import com.quickblox.chat.QBWebRTCSignaling;
 import com.quickblox.chat.exception.QBChatException;
 import com.quickblox.chat.listeners.QBChatDialogMessageListener;
+import com.quickblox.chat.listeners.QBRosterListener;
+import com.quickblox.chat.listeners.QBSubscriptionListener;
 import com.quickblox.chat.listeners.QBVideoChatSignalingManagerListener;
 import com.quickblox.chat.model.QBChatDialog;
 import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.chat.model.QBPresence;
 import com.quickblox.users.model.QBUser;
 import com.quickblox.videochat.webrtc.QBRTCClient;
 import com.quickblox.videochat.webrtc.QBRTCSession;
@@ -20,10 +26,15 @@ import com.quickblox.videochat.webrtc.callbacks.QBRTCSessionConnectionCallbacks;
 import com.quickblox.videochat.webrtc.exception.QBRTCException;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.qbcore.models.Presence;
 import com.webwerks.qbcore.models.RealmInteger;
 import com.webwerks.qbcore.models.User;
 import com.webwerks.qbcore.utils.RealmHelper;
 
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +60,10 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
 
     private QBChatService chatService;
     private static QBRTCSession currentSession;
+
+    private QBSubscriptionListener subscriptionListener;
+    private QBRosterListener rosterListener;
+    private static QBRoster сhatRoster ;
 
     public static ChatManager getInstance(){
         if(instance==null) {
@@ -147,9 +162,6 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
     public void onSessionClosed(QBRTCSession qbrtcSession) {
         Log.e("TAG","onSessionClosed" + qbrtcSession.getCallerID() + ":::" + qbrtcSession.equals(getCurrentSession()));
         if (qbrtcSession.equals(getCurrentSession())) {
-           /* if (audioManager != null) {
-                audioManager.close();
-            }*/
             releaseCurrentSession();
             currentCallStateCallback.onCallConnectionClose(qbrtcSession.getCallerID());
         }
@@ -163,11 +175,13 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
 
     @Override
     public void onDisconnectedFromUser(QBRTCSession qbrtcSession, Integer integer) {
-
+        Log.e("TAG","onDisconnectedFromUser" + qbrtcSession.getCallerID());
     }
 
     @Override
     public void onConnectionClosedForUser(QBRTCSession qbrtcSession, Integer integer) {
+        Log.e("TAG","onConnectionClosedForUser" + qbrtcSession.getCallerID());
+        releaseCurrentSession();
         currentCallStateCallback.onCallConnectionClose(qbrtcSession.getCallerID());
     }
 
@@ -282,6 +296,7 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
                         }else{
                             try {
                                 chatService.login(user);
+                                initRoster();
                                 return User.fromQbUser(user);
                             }catch (Exception e){
                                 e.printStackTrace();
@@ -298,11 +313,79 @@ public class ChatManager implements QBRTCClientSessionCallbacks ,QBRTCSessionCon
         Log.e(TAG, "startCall()");
         List<Integer> opponentsList = RealmHelper.fromIntegerRelamList(occupant);
 
+        for(Integer user:opponentsList){
+            Log.e(TAG,user+":::"+checkUserPresence(user));
+        }
+
         QBRTCTypes.QBConferenceType conferenceType = QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_AUDIO;
         QBRTCClient qbrtcClient = QBRTCClient.getInstance(context);
         QBRTCSession newQbRtcSession = qbrtcClient.createNewSessionWithOpponents(opponentsList, conferenceType);
         setCurrentSession(newQbRtcSession);
         newQbRtcSession.startCall(null);
+    }
+
+    public static Presence checkUserPresence(int userId){
+        QBPresence presence = сhatRoster.getPresence(userId);
+        if (presence == null) {
+            return Presence.OFFLINE;
+        }
+
+        if (presence.getType() == QBPresence.Type.online)
+            return Presence.ONLINE;
+        else
+            return Presence.OFFLINE;
+    }
+
+    private void initRoster() {
+        initSubscriptionListener();
+        сhatRoster = chatService.getRoster(QBRoster.SubscriptionMode.mutual, subscriptionListener);
+        сhatRoster.addRosterListener(new QBRosterListener() {
+            @Override
+            public void entriesDeleted( Collection< Integer > userIds ) {
+                Log.e("entriesDeleted: ",""+ userIds);
+            }
+
+            @Override
+            public void entriesAdded( Collection< Integer > userIds ) {
+                Log.e("entriesAdded: ",""+ userIds);
+            }
+
+            @Override
+            public void entriesUpdated( Collection< Integer > userIds ) {
+                Log.e("entriesUpdated: ",""+ userIds);
+            }
+
+            @Override
+            public void presenceChanged( QBPresence presence ) {
+
+                if(presence.getType() == QBPresence.Type.online ){
+                }
+            }
+        });
+    }
+
+    private void initSubscriptionListener() {
+        subscriptionListener = new QBSubscriptionListener() {
+            @Override
+            public void subscriptionRequested( int userId ) {
+                confirmAddRequest(userId);
+            }
+        };
+    }
+
+    public void confirmAddRequest(int userID) {
+        if ( сhatRoster == null ) {
+            Log.e( "сhatRoster == null ", "Please login first" );
+            return;
+        }
+
+        try {
+            сhatRoster.confirmSubscription(userID);
+        } catch (SmackException.NotConnectedException | SmackException.NotLoggedInException | SmackException.NoResponseException e) {
+            Log.e("error: ", e.getClass().getSimpleName());
+        } catch (XMPPException e) {
+            Log.e("error: ", e.getLocalizedMessage());
+        }
     }
 
 }

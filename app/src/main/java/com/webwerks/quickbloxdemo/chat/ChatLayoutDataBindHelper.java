@@ -13,10 +13,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.qbcore.models.User;
+import com.webwerks.qbcore.user.QbUserAuth;
 import com.webwerks.qbcore.utils.Constant;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.audio.AudioPlayerManager;
@@ -356,8 +359,26 @@ public class ChatLayoutDataBindHelper {
         });
     }
 
-    public static void configureCallView(Context context, ChatAdapter.CallHolder holder,Messages messages){
-        holder.lblCallMsg.setText("you we're in a call("+messages.getCallDuration()+")");
+    public static void configureCallView(Context context, final ChatAdapter.CallHolder holder,Messages messages){
+        if(TextUtils.isEmpty(messages.getCallDuration()) ||
+                messages.getCallDuration().equals("00:00")){
+            QbUserAuth.getUserFromId(messages.getSenderId()).subscribe(new Consumer<User>() {
+                @Override
+                public void accept(User user) throws Exception {
+                    if(user.id==App.getAppInstance().getCurrentUser().id){
+                        holder.lblCallMsg.setText("NOT RESPONDING");
+                    }else{
+                        holder.lblCallMsg.setText("you missed call from "+ user.fullName);
+                    }
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                }
+            });
+        }else {
+            holder.lblCallMsg.setText("you we're in a call (" + messages.getCallDuration() + ")");
+        }
 
         LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.topMargin=10;

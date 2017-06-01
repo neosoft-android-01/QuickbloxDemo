@@ -22,6 +22,7 @@ import com.webwerks.qbcore.chat.SendMessageRequest;
 import com.webwerks.qbcore.models.ChatDialog;
 import com.webwerks.qbcore.models.MessageType;
 import com.webwerks.qbcore.models.Messages;
+import com.webwerks.qbcore.models.Presence;
 import com.webwerks.quickbloxdemo.R;
 import com.webwerks.quickbloxdemo.chat.audio.AudioPlayerManager;
 import com.webwerks.quickbloxdemo.chat.location.UploadLocation;
@@ -121,24 +122,30 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
 
     @Override
     public void onIncomingCall() {
-        ringtonePlayer=new RingtonePlayer(this,R.raw.beep);
-        ringtonePlayer.play(true);
-        findViewById(R.id.ll_call).setVisibility(View.VISIBLE);
-        ChatManager.setCurrentCallStateCallback(new CurrentCallStateCallback() {
-            @Override
-            public void onCallStarted() {
-            }
+        if(ChatManager.getInstance().checkUserPresence(App.getAppInstance().getCurrentUser().id)
+                .equals(Presence.ONLINE)) {
 
-            @Override
-            public void onCallStopped() {
-                ringtonePlayer.stop();
-                findViewById(R.id.ll_call).setVisibility(View.GONE);
-            }
+            ringtonePlayer = new RingtonePlayer(this, R.raw.beep);
+            ringtonePlayer.play(true);
+            findViewById(R.id.ll_call).setVisibility(View.VISIBLE);
+            ChatManager.setCurrentCallStateCallback(new CurrentCallStateCallback() {
+                @Override
+                public void onCallStarted() {
+                }
 
-            @Override
-            public void onCallConnectionClose(int callerId) {
-            }
-        });
+                @Override
+                public void onCallStopped() {
+                    ringtonePlayer.stop();
+                    findViewById(R.id.ll_call).setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onCallConnectionClose(int callerId) {
+                    ringtonePlayer.stop();
+                    findViewById(R.id.ll_call).setVisibility(View.GONE);
+                }
+            });
+        }
     }
 
     public void stopRingTone(){
@@ -194,6 +201,9 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                     if (data != null) {
                         boolean caller=data.getBooleanExtra("CALLER",false);
                         final String duration = data.getStringExtra("DURATION");
+
+                        Log.e("CALL INFO",caller+":::"+duration);
+
                         if(caller){
                             SendMessageRequest sendRequest = new SendMessageRequest.Builder(currentDialog, null)
                                     .messageType(MessageType.CALL)
@@ -204,14 +214,6 @@ public class ChatActivity extends BaseActivity<ChatBinding> implements IncomingM
                                     showMessages(messages);
                                 }
                             });
-                        }else{
-                            Messages msg=new Messages();
-                            msg.setChatDialogId(currentDialog.getDialogId());
-                            msg.setId(App.getAppInstance().getCurrentUser().id+"");
-                            msg.setMessageType(MessageType.CALL);
-                            msg.setCallDuration(duration);
-                            msg.setDateSent(System.currentTimeMillis() / 1000);
-                            showMessages(msg);
                         }
                     }
                     break;

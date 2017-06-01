@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="baseLibrary-2.3.2">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Downloads/android-studio-2/gradle/m2repository/com/android/databinding/baseLibrary/2.3.2/baseLibrary-2.3.2.jar!/" />
+      <root url="jar://$APPLICATION_HOME_DIR$/gradle/m2repository/com/android/databinding/baseLibrary/2.3.2/baseLibrary-2.3.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

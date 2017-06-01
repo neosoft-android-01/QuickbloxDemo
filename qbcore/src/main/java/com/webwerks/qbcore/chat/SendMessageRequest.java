@@ -194,6 +194,7 @@ public class SendMessageRequest {
                     chatMessage.setSaveToHistory(true); // Save a message to history
                     chatMessage.setDateSent(sentTime==0?System.currentTimeMillis() / 1000:sentTime);
                     chatMessage.setMarkable(true);
+                    chatMessage.setSenderId(chatDialog.getUserId());
                     qbChatDialog.sendMessage(chatMessage);
                     return Messages.getChatMessage(chatMessage);
                 } catch (SmackException.NotConnectedException e) {
